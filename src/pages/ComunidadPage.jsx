@@ -31,19 +31,35 @@ export default function ComunidadPage() {
   const { data: recetas = [], isLoading } = useQuery({
     queryKey: ['comunidad', orden],
     queryFn: async () => {
-      const { data } = await supabase
+      // 1. Traer recetas públicas
+      const { data: recetasData } = await supabase
         .from('recetas')
         .select(`
           id, titulo, tipo_comida, dificultad, tiempo_coccion,
-          comensales_base, likes, imagen_url, created_at,
-          perfiles!recetas_autor_id_fkey(nombre),
+          comensales_base, likes, imagen_url, created_at, autor_id,
           hogar:hogares(nombre)
         `)
         .eq('publica', true)
-        .neq('hogar_id', hogar.id)   // excluir las propias
+        .neq('hogar_id', hogar.id)
         .order(orden === 'likes' ? 'likes' : 'created_at', { ascending: false })
         .limit(50)
-      return data ?? []
+      if (!recetasData?.length) return []
+
+      // 2. Traer nombres de autores por separado (evita problema de RLS en perfiles)
+      const autorIds = [...new Set(recetasData.map(r => r.autor_id).filter(Boolean))]
+      let autoresMap = {}
+      if (autorIds.length > 0) {
+        const { data: autores } = await supabase
+          .from('perfiles')
+          .select('id, nombre')
+          .in('id', autorIds)
+        autoresMap = Object.fromEntries((autores ?? []).map(a => [a.id, a.nombre]))
+      }
+
+      return recetasData.map(r => ({
+        ...r,
+        autor_nombre: autoresMap[r.autor_id] ?? null,
+      }))
     },
     enabled: !!hogar?.id,
     staleTime: 1000 * 60 * 3,
@@ -282,20 +298,18 @@ export default function ComunidadPage() {
             return (
               <div key={r.id} className="com-card" onClick={() => navigate(`/recetas/${r.id}`)}>
                 {/* Imagen o placeholder */}
-                <div onClick={e => e.stopPropagation()}>
-                  {r.imagen_url
-                    ? <img className="com-card-img" src={r.imagen_url} alt={r.titulo} loading="lazy" />
-                    : <div className="com-card-emoji-placeholder">{TIPO_EMOJI[r.tipo_comida] ?? '🍽️'}</div>
-                  }
-                </div>
+                {r.imagen_url
+                  ? <img className="com-card-img" src={r.imagen_url} alt={r.titulo} loading="lazy" />
+                  : <div className="com-card-emoji-placeholder">{TIPO_EMOJI[r.tipo_comida] ?? '🍽️'}</div>
+                }
 
                 <div className="com-card-body">
                   <div className="com-card-titulo">{r.titulo}</div>
                   <div className="com-card-autor">
-                    {r.perfiles?.nombre && <strong style={{ color: 'var(--text-2)' }}>{r.perfiles.nombre}</strong>}
-                    {r.hogar?.nombre && (
-                      <span> · 🏠 {r.hogar.nombre}</span>
+                    {r.autor_nombre && (
+                      <><strong style={{ color: 'var(--text-2)' }}>{r.autor_nombre}</strong> · </>
                     )}
+                    {r.hogar?.nombre && <>🏠 {r.hogar.nombre}</>}
                   </div>
                   <div className="com-card-meta">
                     {r.dificultad && (
