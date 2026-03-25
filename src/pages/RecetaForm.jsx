@@ -48,7 +48,7 @@ export default function RecetaForm() {
   const [dificultad,  setDificultad]  = useState('facil')
   const [tiempoPrep,  setTiempoPrep]  = useState('')
   const [tiempoCoc,   setTiempoCoc]   = useState('')
-  const [comensales,  setComensales]  = useState(2)
+  const [comensales,  setComensales]  = useState(hogar?.num_comensales ?? 2)
   const [publica,     setPublica]     = useState(false)
   const [pasos,       setPasos]       = useState([''])
   const [tags,        setTags]        = useState('')
