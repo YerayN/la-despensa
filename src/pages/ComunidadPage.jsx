@@ -292,8 +292,10 @@ export default function ComunidadPage() {
                 <div className="com-card-body">
                   <div className="com-card-titulo">{r.titulo}</div>
                   <div className="com-card-autor">
-                    {r.perfiles?.nombre ?? 'Anónimo'}
-                    {r.hogar?.nombre && <> · {r.hogar.nombre}</>}
+                    {r.perfiles?.nombre && <strong style={{ color: 'var(--text-2)' }}>{r.perfiles.nombre}</strong>}
+                    {r.hogar?.nombre && (
+                      <span> · 🏠 {r.hogar.nombre}</span>
+                    )}
                   </div>
                   <div className="com-card-meta">
                     {r.dificultad && (
