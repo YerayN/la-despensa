@@ -14,6 +14,13 @@ import ComunidadPage    from './pages/ComunidadPage'
 import AjustesPage      from './pages/AjustesPage'
 
 // ─── Pantalla de carga ────────────────────────────────────────
+const loadingStyles = `
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1) }
+    50% { opacity: .7; transform: scale(.96) }
+  }
+`
+
 function LoadingScreen() {
   return (
     <div style={{
@@ -26,6 +33,7 @@ function LoadingScreen() {
       background: '#F6F8F6',
       fontFamily: "'DM Sans', sans-serif",
     }}>
+      <style>{loadingStyles}</style>   {/* ← ahora es estable entre renders */}
       <div style={{
         width: 52, height: 52,
         background: 'linear-gradient(135deg, #2D6A4F, #40916C)',
@@ -37,7 +45,6 @@ function LoadingScreen() {
       }}>
         🥘
       </div>
-      <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(.96)} }`}</style>
     </div>
   )
 }

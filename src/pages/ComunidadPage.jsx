@@ -137,8 +137,8 @@ export default function ComunidadPage() {
         .busq-input:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(45,106,79,0.1); }
         .busq-input::placeholder { color:var(--text-3); }
 
-        .filtros-row { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; overflow:hidden; }
-        .filtros-scroll { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex:1; min-width:0; -webkit-overflow-scrolling:touch; }
+        .filtros-row { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; overflow:hidden; width:100%; box-sizing:border-box; }
+        .filtros-scroll { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex:1; min-width:0; max-width:100%; -webkit-overflow-scrolling:touch; }
         .filtros-scroll::-webkit-scrollbar { display:none; }
         .filtro-chip {
           flex-shrink:0; padding:5px 12px; border-radius:100px;

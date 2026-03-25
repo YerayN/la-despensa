@@ -69,6 +69,8 @@ export default function Layout() {
         .app-shell {
           display: flex;
           min-height: 100dvh;
+          overflow-x: hidden;   /* ← evita scroll horizontal global */
+          width: 100%;
         }
 
         /* ════════════════════════════════
@@ -203,8 +205,9 @@ export default function Layout() {
           display: flex;
           flex-direction: column;
           min-height: 100dvh;
-          /* espacio para bottom nav en móvil */
           padding-bottom: var(--nav-h);
+          overflow-x: hidden;   /* ← esto es todo */
+          width: 100%;          /* ← y esto */
         }
 
         @media (min-width: 768px) {
@@ -220,6 +223,8 @@ export default function Layout() {
           max-width: var(--content-max);
           margin: 0 auto;
           padding: 20px 16px;
+          overflow-x: hidden;
+          min-width: 0;
         }
 
         @media (min-width: 768px) {
