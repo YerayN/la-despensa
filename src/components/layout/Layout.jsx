@@ -33,7 +33,7 @@ export default function Layout() {
           --brand-dark:   #1B4332;
           --brand-pale:   #D8F3DC;
           --brand-pale2:  #B7E4C7;
-          --accent:       #F4845F;
+          --accent:       #f37e57;
           --bg:           #F6F8F6;
           --surface:      #FFFFFF;
           --surface-2:    #F0F4F1;
