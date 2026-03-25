@@ -121,7 +121,7 @@ export default function ComunidadPage() {
   return (
     <>
       <style>{`
-        .com-toolbar { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+        .com-toolbar { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; width:100%; box-sizing:border-box; overflow:hidden; }
 
         .busq-wrap { position:relative; }
         .busq-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-3); pointer-events:none; }
@@ -132,12 +132,13 @@ export default function ComunidadPage() {
           background:var(--surface); outline:none;
           transition:border-color var(--transition);
           -webkit-appearance:none;
+          box-sizing:border-box;
         }
         .busq-input:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(45,106,79,0.1); }
         .busq-input::placeholder { color:var(--text-3); }
 
-        .filtros-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-        .filtros-scroll { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex:1; }
+        .filtros-row { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; overflow:hidden; }
+        .filtros-scroll { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex:1; min-width:0; -webkit-overflow-scrolling:touch; }
         .filtros-scroll::-webkit-scrollbar { display:none; }
         .filtro-chip {
           flex-shrink:0; padding:5px 12px; border-radius:100px;
@@ -156,8 +157,8 @@ export default function ComunidadPage() {
         }
 
         /* Grid de cards */
-        .com-grid { display:grid; grid-template-columns:1fr; gap:12px; }
-        @media(min-width:480px)  { .com-grid { grid-template-columns:1fr 1fr; } }
+        .com-grid { display:grid; grid-template-columns:1fr; gap:10px; width:100%; box-sizing:border-box; }
+        @media(min-width:500px)  { .com-grid { grid-template-columns:1fr 1fr; } }
         @media(min-width:768px)  { .com-grid { grid-template-columns:repeat(3,1fr); } }
         @media(min-width:1024px) { .com-grid { grid-template-columns:repeat(4,1fr); } }
 
@@ -165,21 +166,21 @@ export default function ComunidadPage() {
           background:var(--surface); border:1px solid var(--border);
           border-radius:var(--radius); overflow:hidden; cursor:pointer;
           transition:all var(--transition); display:flex; flex-direction:row;
-          align-items:stretch;
+          align-items:stretch; min-width:0; box-sizing:border-box;
         }
         .com-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); border-color:var(--brand-pale2); }
-        @media(min-width:480px) { .com-card { flex-direction:column; } }
+        @media(min-width:500px) { .com-card { flex-direction:column; } }
 
         .com-card-img {
-          width:90px; height:90px; object-fit:cover; object-position:center;
+          width:80px; height:80px; object-fit:cover; object-position:center;
           background:var(--surface-2); display:block; flex-shrink:0;
         }
         .com-card-emoji-placeholder {
-          width:90px; height:90px; background:var(--surface-2);
+          width:80px; height:80px; background:var(--surface-2);
           display:flex; align-items:center; justify-content:center;
-          font-size:28px; flex-shrink:0;
+          font-size:24px; flex-shrink:0;
         }
-        @media(min-width:480px) {
+        @media(min-width:500px) {
           .com-card-img { width:100%; height:auto; aspect-ratio:4/3; }
           .com-card-emoji-placeholder { width:100%; height:auto; aspect-ratio:4/3; font-size:36px; }
         }
@@ -194,9 +195,9 @@ export default function ComunidadPage() {
           display:flex; align-items:center; justify-content:space-between;
           padding:8px 12px; border-top:1px solid var(--border); margin-top:auto;
         }
-        @media(max-width:479px) {
-          .com-card-actions { border-top:none; border-left:1px solid var(--border); flex-direction:column; justify-content:center; gap:8px; padding:8px; }
-          .com-card-body { padding:10px 10px 4px; }
+        @media(max-width:499px) {
+          .com-card-actions { border-top:none; border-left:1px solid var(--border); flex-direction:column; justify-content:center; gap:8px; padding:8px; flex-shrink:0; }
+          .com-card-body { padding:10px 10px 4px; min-width:0; flex:1; }
         }
         .com-card-likes { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--text-3); }
 

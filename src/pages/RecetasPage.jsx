@@ -85,6 +85,8 @@ export default function RecetasPage() {
           border-radius: 12px;
           padding: 4px;
           margin-bottom: 16px;
+          width: 100%;
+          box-sizing: border-box;
         }
         .recetas-tab {
           flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -112,6 +114,8 @@ export default function RecetasPage() {
           display: flex; gap: 8px; overflow-x: auto;
           padding-bottom: 4px; margin-bottom: 20px;
           scrollbar-width: none;
+          max-width: 100%;
+          -webkit-overflow-scrolling: touch;
         }
         .filtros-scroll::-webkit-scrollbar { display: none; }
         .filtro-btn {
@@ -133,6 +137,7 @@ export default function RecetasPage() {
           display: flex; align-items: center; gap: 14px;
           cursor: pointer; transition: all var(--transition);
           text-decoration: none;
+          min-width: 0; width: 100%; box-sizing: border-box;
         }
         .receta-row:hover { border-color: var(--brand-pale2); box-shadow: var(--shadow-md); transform: translateX(2px); }
 
