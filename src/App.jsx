@@ -11,6 +11,7 @@ import RecetaForm     from './pages/RecetaForm'
 import PlanningPage   from './pages/PlanningPage'
 import ListaPage      from './pages/ListaPage'
 import ComunidadPage  from './pages/ComunidadPage'
+import ConsultaPage from './pages/ConsultaPage'
 import AjustesPage    from './pages/AjustesPage'
 
 function LoadingScreen() {
@@ -55,6 +56,16 @@ function AppRoute({ children }) {
   return children
 }
 
+// Solo para nutricionistas
+function NutricionistaRoute({ children }) {
+  const { user, perfil, loading } = useAuth()
+  if (loading || perfil === undefined) return <LoadingScreen />
+  if (!user) return <Navigate to="/auth" replace />
+  if (!perfil?.hogar_id) return <Navigate to="/setup-hogar" replace />
+  if (!perfil?.es_nutricionista) return <Navigate to="/" replace /> // Si no es nutri, a la calle
+  return children
+}
+
 export default function App() {
   return (
     <Routes>
@@ -75,6 +86,7 @@ export default function App() {
         <Route path="planning"           element={<PlanningPage />} />
         <Route path="lista"              element={<ListaPage />} />
         <Route path="comunidad"          element={<ComunidadPage />} />
+        <Route path="consulta/*"         element={<NutricionistaRoute><ConsultaPage /></NutricionistaRoute>} />
         <Route path="ajustes"            element={<AjustesPage />} />
       </Route>
 

@@ -2,26 +2,36 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, BookOpen, CalendarDays,
-  ShoppingCart, Users, Settings
+  ShoppingCart, Users, Settings, Stethoscope
 } from 'lucide-react'
-
-const NAV_ITEMS = [
-  { to: '/',            label: 'Inicio',   icon: LayoutDashboard },
-  { to: '/recetas',     label: 'Recetas',  icon: BookOpen        },
-  { to: '/planning',    label: 'Planning', icon: CalendarDays    },
-  { to: '/lista',       label: 'Compra',   icon: ShoppingCart    },
-  { to: '/comunidad',   label: 'Comunidad',icon: Users           },
-  { to: '/ajustes',     label: 'Ajustes',  icon: Settings        },
-]
 
 export default function Layout() {
   const { perfil, hogar } = useAuth()
   const location = useLocation()
 
+  // Construimos el menú dinámicamente según quién sea el usuario
+  const navItems = [
+    { to: '/',            label: 'Inicio',   icon: LayoutDashboard },
+    { to: '/recetas',     label: 'Recetas',  icon: BookOpen        },
+    { to: '/planning',    label: 'Planning', icon: CalendarDays    },
+    { to: '/lista',       label: 'Compra',   icon: ShoppingCart    },
+    { to: '/comunidad',   label: 'Comunidad',icon: Users           },
+  ]
+
+  // Si es nutricionista, le metemos el botón de su consulta antes de Ajustes
+  if (perfil?.es_nutricionista) {
+    navItems.push({ to: '/consulta', label: 'Consulta', icon: Stethoscope })
+  }
+
+  // Ajustes siempre al final
+  navItems.push({ to: '/ajustes', label: 'Ajustes', icon: Settings })
+
   const isActive = (to) => {
     if (to === '/') return location.pathname === '/'
     return location.pathname.startsWith(to)
   }
+  
+  // ... (aquí sigue tu código del return tal y como estaba)
 
   return (
     <>
