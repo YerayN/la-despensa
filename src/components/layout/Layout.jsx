@@ -103,12 +103,12 @@ export default function Layout() {
             margin-bottom: 8px;
           }
 
+          /* 🟢 NUEVO: Estilos del logo transparente 🟢 */
           .sidebar-logo-icon {
             width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
           }
-
           .sidebar-logo-icon img {
             width: 100%; height: 100%; object-fit: contain;
           }
@@ -205,8 +205,8 @@ export default function Layout() {
           flex-direction: column;
           min-height: 100dvh;
           padding-bottom: var(--nav-h);
-          overflow-x: hidden;   /* ← esto es todo */
-          width: 100%;          /* ← y esto */
+          overflow-x: hidden;
+          width: 100%;
         }
 
         @media (min-width: 768px) {
@@ -250,7 +250,6 @@ export default function Layout() {
           display: flex;
           align-items: stretch;
           z-index: 200;
-          /* safe area para iPhone con home bar */
           padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
@@ -299,173 +298,40 @@ export default function Layout() {
         }
 
         /* ── Utilidades globales reutilizables en todas las páginas ── */
-        .card {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: var(--radius);
-          box-shadow: var(--shadow);
-        }
-
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 3px 10px;
-          border-radius: 100px;
-          font-size: 12px;
-          font-weight: 600;
-        }
-
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; }
         .badge-green  { background: var(--brand-pale);  color: var(--brand-dark); }
         .badge-orange { background: #FEF0E8; color: #C4622D; }
         .badge-red    { background: #FDECEA; color: #B83A2F; }
         .badge-gray   { background: var(--surface-2); color: var(--text-2); }
-
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-          border: none;
-          border-radius: var(--radius-sm);
-          font-family: var(--font-body);
-          font-weight: 600;
-          cursor: pointer;
-          transition: all var(--transition);
-          -webkit-tap-highlight-color: transparent;
-          white-space: nowrap;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-          color: white;
-          box-shadow: 0 2px 10px rgba(45,106,79,0.22);
-          padding: 11px 20px;
-          font-size: 14px;
-        }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: all var(--transition); -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+        .btn-primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%); color: white; box-shadow: 0 2px 10px rgba(45,106,79,0.22); padding: 11px 20px; font-size: 14px; }
         .btn-primary:hover { opacity: 0.9; box-shadow: 0 4px 16px rgba(45,106,79,0.28); }
         .btn-primary:active { transform: scale(0.97); }
-
-        .btn-secondary {
-          background: var(--surface);
-          color: var(--text-2);
-          border: 1.5px solid var(--border);
-          padding: 10px 18px;
-          font-size: 14px;
-        }
+        .btn-secondary { background: var(--surface); color: var(--text-2); border: 1.5px solid var(--border); padding: 10px 18px; font-size: 14px; }
         .btn-secondary:hover { border-color: var(--brand-pale2); background: var(--surface-2); }
-
-        .btn-ghost {
-          background: transparent;
-          color: var(--text-3);
-          padding: 8px 12px;
-          font-size: 14px;
-        }
+        .btn-ghost { background: transparent; color: var(--text-3); padding: 8px 12px; font-size: 14px; }
         .btn-ghost:hover { background: var(--surface-2); color: var(--text-2); }
-
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
         .btn-sm { padding: 7px 14px; font-size: 13px; }
         .btn-lg { padding: 13px 24px; font-size: 15px; }
         .btn-full { width: 100%; }
 
-        .spinner-sm {
-          width: 16px; height: 16px;
-          border: 2px solid rgba(255,255,255,0.35);
-          border-top-color: white;
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-          flex-shrink: 0;
+        /* 🟢 NUEVO: Reglas de impresión globales 🟢 */
+        @media print {
+          /* Escondemos los menús siempre que se imprima algo */
+          .sidebar, .bottom-nav { display: none !important; }
+          
+          /* Le quitamos los márgenes al contenido principal para aprovechar el papel */
+          .main-content {
+            margin-left: 0 !important;
+            padding-bottom: 0 !important;
+          }
+          .page-wrapper {
+            padding: 0 !important;
+            max-width: 100% !important;
+          }
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Input genérico */
-        .input-field {
-          width: 100%;
-          padding: 10px 14px;
-          border: 1.5px solid var(--border);
-          border-radius: var(--radius-sm);
-          font-family: var(--font-body);
-          font-size: 15px;
-          color: var(--text);
-          background: var(--surface);
-          outline: none;
-          transition: border-color var(--transition), box-shadow var(--transition);
-          -webkit-appearance: none;
-        }
-        .input-field:focus {
-          border-color: var(--brand);
-          box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
-        }
-        .input-field::placeholder { color: var(--text-3); }
-
-        /* Divider */
-        .divider {
-          height: 1px;
-          background: var(--border);
-          border: none;
-          margin: 0;
-        }
-
-        /* Skeleton loader */
-        .skeleton {
-          background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.4s infinite;
-          border-radius: 8px;
-        }
-        @keyframes shimmer { to { background-position: -200% 0; } }
-
-        /* Empty state */
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          padding: 48px 24px;
-          text-align: center;
-          color: var(--text-3);
-        }
-        .empty-state-icon {
-          font-size: 40px;
-          opacity: 0.6;
-          margin-bottom: 4px;
-        }
-        .empty-state h3 {
-          font-family: var(--font-display);
-          font-size: 18px;
-          color: var(--text-2);
-          font-weight: 600;
-        }
-        .empty-state p { font-size: 14px; line-height: 1.5; max-width: 280px; }
-
-        /* Page header */
-        .page-header {
-          margin-bottom: 24px;
-        }
-        .page-title {
-          font-family: var(--font-display);
-          font-size: 26px;
-          font-weight: 700;
-          color: var(--text);
-          letter-spacing: -0.5px;
-          line-height: 1.2;
-        }
-        .page-subtitle {
-          font-size: 14px;
-          color: var(--text-3);
-          margin-top: 4px;
-        }
-        @media (min-width: 768px) {
-          .page-title { font-size: 30px; }
-        }
-
-        /* Scrollbar sutil */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
       `}</style>
 
       <div className="app-shell">
@@ -473,6 +339,7 @@ export default function Layout() {
         {/* ── Sidebar escritorio ── */}
         <aside className="sidebar">
           <div className="sidebar-logo">
+            {/* 🟢 NUEVO: Logo transparente cargado 🟢 */}
             <div className="sidebar-logo-icon">
               <img src="/logo.png" alt="Logo" />
             </div>
