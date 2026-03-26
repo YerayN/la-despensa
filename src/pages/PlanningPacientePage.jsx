@@ -248,16 +248,21 @@ export default function PlanningPacientePage() {
           
           .print-only { display: block !important; width: 100%; font-family: 'DM Sans', sans-serif; }
           
+          /* CABECERA GIGANTE */
           .pr-hero-header {
-            background: #EDF3EF !important; padding: 40px 50px;
+            background: #EDF3EF !important;
+            padding: 40px 50px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #C5D9CB; margin-bottom: 30px;
+            border-bottom: 1px solid #C5D9CB;
+            margin-bottom: 30px;
           }
           
           .pr-nutri-brand { display: flex; align-items: center; gap: 25px; }
           .pr-nutri-logo { 
-            width: 90px; height: 90px; object-fit: contain; border-radius: 16px; 
-            background: white !important; padding: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 90px; height: 90px;
+            object-fit: contain; border-radius: 16px; 
+            background: white !important; padding: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
           }
           .pr-nutri-data h1 { 
             font-family: 'Fraunces', serif; font-size: 32px; font-weight: 800;
@@ -273,34 +278,52 @@ export default function PlanningPacientePage() {
             margin: 0 50px 35px; padding: 20px 25px;
             background: white !important; border: 1px solid #E2EBE4; border-radius: 16px;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(45,106,79,0.04);
           }
           .pr-pac-name { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #5A7366; }
           .pr-pac-name strong { font-family: 'Fraunces', serif; font-size: 20px; color: #1A2E22 !important; }
           .pr-racion-badge {
-            background: var(--brand-pale) !important; color: var(--brand-dark) !important;
+            background: #D8F3DC !important; color: #1B4332 !important;
             padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 13px;
           }
 
-          .pr-titulo-sem { text-align: center; font-family: 'Fraunces', serif; font-size: 26px; margin: 0 0 25px 0; color: #1A2E22; }
+          .pr-titulo-sem { text-align: center; font-family: 'Fraunces', serif; font-size: 26px; margin: 0 0 25px 0; color: #1A2E22; letter-spacing: -0.3px;}
 
           .pr-table-container { margin: 0 30px 50px; }
-          .pr-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #E2EBE4; border-radius: 14px; overflow: hidden; page-break-inside: avoid; }
+          .pr-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #E2EBE4; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); page-break-inside: avoid; }
           .pr-table th, .pr-table td { border-bottom: 1px solid #E2EBE4; border-right: 1px solid #E2EBE4; padding: 15px; text-align: left; font-size: 13px; }
-          .pr-table th { background: #F8FAF8 !important; font-weight: 700; color: #2D6A4F; text-transform: uppercase; font-size: 11px; }
+          .pr-table th:last-child, .pr-table td:last-child { border-right: none; }
+          .pr-table tr:last-child td { border-bottom: none; }
+          
+          .pr-table th { background: #F8FAF8 !important; font-weight: 700; color: #2D6A4F; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
+          .pr-table td { vertical-align: top; line-height: 1.5; background: white !important; }
           .pr-dia-celda { font-weight: 800; background: #EDF3EF !important; width: 130px; font-size: 14px; color: #1B4332 !important;}
+          .pr-receta-txt { font-weight: 600; color: #1A2E22; display: block; margin-top: 2px; }
           
           .pr-body-content { margin: 0 50px; }
-          .pr-seccion-titulo { font-family: 'Fraunces', serif; font-size: 28px; color: #1B4332; margin: 0 0 30px 0; page-break-before: always; border-bottom: 1px solid #E2EBE4; padding-bottom: 10px; }
+          .pr-seccion-titulo { font-family: 'Fraunces', serif; font-size: 28px; color: #1B4332; margin: 40px 0 30px 0; page-break-before: always; border-bottom: 1px solid #E2EBE4; padding-bottom: 10px; }
 
-          .pr-receta { page-break-inside: avoid; border: 1px solid #E2EBE4; border-radius: 16px; padding: 30px; margin-bottom: 30px; background: white !important; }
-          .pr-receta h3 { font-family: 'Fraunces', serif; font-size: 22px; margin: 0 0 15px 0; color: #1B4332; }
+          .pr-receta { 
+            page-break-inside: avoid; border: 1px solid #E2EBE4; border-radius: 16px; 
+            padding: 30px; margin-bottom: 30px; background: white !important; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+          }
+          .pr-receta h3 { font-family: 'Fraunces', serif; font-size: 22px; margin: 0 0 15px 0; color: #1B4332; letter-spacing: -0.3px;}
+          
           .pr-meta-group { display: flex; gap: 25px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #E2EBE4; }
-          .pr-grid { display: grid; grid-template-columns: 1fr 1.8fr; gap: 35px; }
-          .pr-ing-list { list-style: none; padding: 0; margin: 0; font-size: 13px; }
-          .pr-ing-list li { border-bottom: 1px solid #F0F4F1; padding: 8px 0; }
-          .pr-pasos-list { padding-left: 20px; margin: 0; font-size: 13px; line-height: 1.8; }
+          .pr-meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4A6358; font-weight: 600; }
 
-          /* 🟢 ESTILOS LISTA COMPRA 🟢 */
+          .pr-grid { display: grid; grid-template-columns: 1fr 1.8fr; gap: 35px; }
+          .pr-receta h4 { font-size: 14px; text-transform: uppercase; color: #1B4332; margin: 0 0 15px 0; letter-spacing: 0.08em; font-weight: 800; }
+          
+          .pr-ing-list { list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.7; }
+          .pr-ing-list li { border-bottom: 1px solid #F0F4F1; padding: 8px 0; color: #1A2E22; }
+          .pr-ing-list li strong { color: #1B4332; font-weight: 700; }
+          
+          .pr-pasos-list { padding-left: 20px; margin: 0; font-size: 13px; line-height: 1.8; color: #333; }
+          .pr-pasos-list li { margin-bottom: 12px; text-align: justify; padding-left: 5px;}
+
+          /* LISTA COMPRA PDF */
           .pr-lista-compra { page-break-before: always; margin: 0 50px; }
           .pr-lista-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 40px;
@@ -311,26 +334,28 @@ export default function PlanningPacientePage() {
         }
       `}</style>
 
-      {/* INTERFAZ WEB */}
+      {/* ── INTERFAZ NORMAL ── */}
       <div className="no-print">
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: 20 }}>
-          <button className="pln-btn" onClick={() => navigate('/consulta')}><ArrowLeft size={18} /></button>
+          <button className="pln-btn" style={{ width: 36, height: 36 }} onClick={() => navigate('/consulta')}><ArrowLeft size={18} /></button>
           <div style={{display:'flex', alignItems:'center', gap: 12}}>
             <div style={{width: 44, height: 44, borderRadius: '12px', background: 'var(--brand-pale)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--brand)'}}>
                 <User size={24}/>
             </div>
             <div>
-                <h2 style={{ fontFamily:'var(--font-display)', fontSize: 24, margin:0 }}>{paciente?.nombre}</h2>
-                <p style={{ fontSize:14, color:'var(--text-3)', margin:0 }}>Plan nutricional personalizado</p>
+                <h2 style={{ fontFamily:'var(--font-display)', fontSize: 24, color:'var(--text)', margin:0 }}>{paciente?.nombre || 'Cargando...'}</h2>
+                <p style={{ fontSize:14, color:'var(--text-3)', margin:0 }}>Pautando plan nutricional personalizado</p>
             </div>
           </div>
         </div>
 
-        <div className="pln-nav card" style={{padding: '10px 15px', borderRadius: '16px', background: 'white'}}>
+        <div className="pln-nav card" style={{padding: '10px 15px', borderRadius: '16px', background: 'white', border: '1px solid var(--border)'}}>
           <button className="pln-btn" onClick={() => setSemana(d => addDays(d, -7))}><ChevronLeft size={20} /></button>
           <button className="pln-hoy" onClick={() => setSemana(getLunes(new Date()))}>Esta semana</button>
           <button className="pln-btn" onClick={() => setSemana(d => addDays(d, 7))}><ChevronRight size={20} /></button>
+          
           <span className="pln-titulo">{tituloSem}</span>
+          
           <button className="pln-print-btn" onClick={() => setShowPrintModal(true)}>
             <Printer size={16} /> Generar PDF Profesional
           </button>
@@ -338,58 +363,141 @@ export default function PlanningPacientePage() {
 
         <div className="pln-grid">
           {dias.map((d, i) => {
-            const s = getSlot(d, 'comida'); // simplificado para el ejemplo
-            // ... (mapeo igual que tenías)
+            const esHoy = toStr(d) === hoyStr
+            return (
+              <div key={i} className={`pln-dia${esHoy ? ' hoy' : ''}`}>
+                <div className="pln-dia-head">
+                  <div className="pln-dia-left">
+                    <span className="pln-dia-nombre">{DIAS_LARGO[i]}</span>
+                    <span className="pln-dia-fecha">{d.getDate()} de {MESES[d.getMonth()]}</span>
+                  </div>
+                  <div className="pln-dia-num">{d.getDate()}</div>
+                </div>
+                <div className="pln-dia-body">
+                  {TIPOS.map(tipo => {
+                    const s = getSlot(d, tipo.key)
+                    const com = getCom(s)
+                    if (!s) return (
+                      <div key={tipo.key} className="pln-slot-vacio" onClick={() => setSlot({ fecha: toStr(d), tipo: tipo.key })}>
+                        <span className="pln-sv-emoji">{tipo.emoji}</span>
+                        <div className="pln-sv-txt"><span className="pln-sv-tipo">{tipo.label}</span></div>
+                        <div className="pln-sv-icon"><Plus size={16} /></div>
+                      </div>
+                    )
+                    return (
+                      <div key={tipo.key} className="pln-slot-lleno" style={{ background: tipo.bg, borderColor: tipo.border }}>
+                        <div className="pln-sl-head">
+                          <span className="pln-sl-emoji">{tipo.emoji}</span>
+                          <div className="pln-sl-info">
+                            <div className="pln-sl-tipo" style={{ color: tipo.accent }}>{tipo.label}</div>
+                            <div className="pln-sl-titulo" style={{ color: tipo.text }}>{s.recetas?.titulo}</div>
+                          </div>
+                          <button className="pln-sl-del" style={{ color: tipo.text }} onClick={() => borrar.mutate({ d: toStr(d), t: tipo.key })}><X size={14} /></button>
+                        </div>
+                        <div className="pln-sl-foot">
+                          <button className="pln-sl-ver" style={{ color: tipo.accent }} onClick={() => navigate(`/recetas/${s.receta_id}`)}><ArrowUpRight size={13} /> Ver</button>
+                          <div className="pln-com">
+                            <button className="pln-com-btn" style={{ color: tipo.text }} onClick={() => camCom.mutate({ s, n: Math.max(1, com - 1) })}><Minus size={12} /></button>
+                            <span className="pln-com-val" style={{ color: tipo.text }}>👤 {com}</span>
+                            <button className="pln-com-btn" style={{ color: tipo.text }} onClick={() => camCom.mutate({ s, n: com + 1 })}><Plus size={12} /></button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
           })}
-          {/* Aquí iría tu grid actual de PlanningPacientePage */}
-          <p style={{textAlign:'center', color:'var(--text-3)', gridColumn:'1/-1', padding:20}}>
-            Añade las comidas arrastrando tus recetas favoritas.
-          </p>
         </div>
 
         {/* MODAL IMPRESIÓN */}
         {showPrintModal && (
           <div className="pln-ov" onClick={() => setShowPrintModal(false)}>
             <div className="pln-modal card" style={{ maxWidth: 450, height: 'auto', padding: 30, borderRadius: '24px' }} onClick={e => e.stopPropagation()}>
-              <div style={{display:'flex', justifyContent:'space-between', marginBottom: 20}}>
-                <h2 style={{fontFamily:'var(--font-display)', fontSize: 24, margin:0}}>Generar Plan Profesional</h2>
-                <button className="pln-modal-cls" onClick={() => setShowPrintModal(false)}><X size={17} /></button>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20}}>
+                <div>
+                    <h2 style={{fontFamily:'var(--font-display)', fontSize: 24, margin: '0 0 5px 0'}}>Generar Plan Profesional</h2>
+                    <p style={{color:'var(--text-3)', margin:0, fontSize: 14}}>Ajusta las porciones para el PDF de {paciente?.nombre}.</p>
+                </div>
+                <button className="pln-modal-cls" style={{margin:0}} onClick={() => setShowPrintModal(false)}><X size={17} /></button>
               </div>
-              <div style={{ background: 'var(--surface-2)', padding: 20, borderRadius: '16px', marginBottom: 25 }}>
-                  <label style={{ fontSize: 14, fontWeight: 700, display:'block', marginBottom: 12 }}>¿Para cuántas raciones calculamos la dieta?</label>
+              <div style={{ background: 'var(--surface-2)', padding: 20, borderRadius: '16px', border: '1px solid var(--border)', marginBottom: 25 }}>
+                  <label style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand-dark)', display:'block', marginBottom: 12 }}>¿Para cuántas raciones calculamos la dieta?</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                    <button className="pln-btn card" disabled={printComensales <= 1} onClick={() => setPrintComensales(c => c - 1)}><Minus size={20} /></button>
-                    <span style={{ fontSize: 36, fontWeight: 800, color: 'var(--brand)', minWidth: 50, textAlign: 'center' }}>{printComensales}</span>
-                    <button className="pln-btn card" onClick={() => setPrintComensales(c => c + 1)}><Plus size={20} /></button>
+                    <button className="pln-btn card" style={{ width: 50, height: 50, borderRadius: '12px' }} disabled={printComensales <= 1} onClick={() => setPrintComensales(c => c - 1)}><Minus size={20} /></button>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--brand)', minWidth: 50, textAlign: 'center' }}>{printComensales}</span>
+                    <button className="pln-btn card" style={{ width: 50, height: 50, borderRadius: '12px' }} onClick={() => setPrintComensales(c => c + 1)}><Plus size={20} /></button>
                   </div>
               </div>
-              <button className="pln-print-btn" style={{ width: '100%', padding: '16px', fontSize: 16 }} onClick={() => { window.print(); setShowPrintModal(false); }}>
+              <button className="pln-print-btn" style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: 16, borderRadius: '14px' }} onClick={() => { window.print(); setShowPrintModal(false); }}>
                 <Printer size={18} /> Crear PDF con Lista de Compra
               </button>
             </div>
           </div>
         )}
+
+        {/* MODAL SELECCIÓN RECETA */}
+        {slot && slotTipo && (
+          <div className="pln-ov" onClick={() => setSlot(null)}>
+            <div className="pln-modal" onClick={e => e.stopPropagation()}>
+              <div className="pln-modal-top">
+                <div><div className="pln-modal-titulo">Asignar comida</div></div>
+                <button className="pln-modal-cls" onClick={() => setSlot(null)}><X size={17} /></button>
+              </div>
+              <div className="pln-modal-busq">
+                <Search size={16} className="pln-modal-busq-ico" />
+                <input autoFocus placeholder="Buscar entre tus recetas..." value={busq} onChange={e => setBusq(e.target.value)} />
+              </div>
+              <div className="pln-modal-list">
+                {filtradas.map(r => {
+                  const t = TIPOS.find(x => x.key === r.tipo_comida)
+                  return (
+                    <div key={r.id} className="pln-modal-row" onClick={() => asignar.mutate(r.id)}>
+                      <div className="pln-modal-ico" style={{ background: t?.bg ?? 'var(--surface-2)', borderColor: t?.border ?? 'var(--border)' }}>{t?.emoji ?? '🍽️'}</div>
+                      <div>
+                        <div className="pln-modal-tit">{r.titulo}</div>
+                        {r.tiempo_coccion && <div className="pln-modal-sub-r">⏱ {r.tiempo_coccion} min</div>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* DISEÑO PDF */}
+      {/* ── 🟢 DISEÑO PDF PREMIUM 🟢 ── */}
       <div className="print-only">
         <div className="pr-hero-header">
           <div className="pr-nutri-brand">
-            {perfil?.logo_url ? <img src={perfil.logo_url} className="pr-nutri-logo" /> : <div className="pr-nutri-logo"><Stethoscope size={50}/></div>}
+            {perfil?.logo_url ? (
+                <img src={perfil.logo_url} alt="Logo Profesional" className="pr-nutri-logo" />
+            ) : (
+                <div className="pr-nutri-logo" style={{display:'flex', alignItems:'center', justifyContent:'center', color:'var(--brand)', background:'white'}}>
+                    <Stethoscope size={50} strokeWidth={1.5}/>
+                </div>
+            )}
             <div className="pr-nutri-data">
               <h1>{perfil?.nombre || user?.user_metadata?.nombre}</h1>
               <p>Nutrición y Dietética Profesional</p>
             </div>
           </div>
           <div className="pr-app-brand">
-            <img src="/logo.png" className="pr-app-logo" />
+            <img src="/logo.png" alt="La Despensa" className="pr-app-logo" />
             <div className="pr-app-web">www.ladespensa.app</div>
           </div>
         </div>
 
         <div className="pr-paciente-card">
-            <div className="pr-pac-name">Plan nutricional para: <strong>{paciente?.nombre}</strong></div>
-            <div className="pr-racion-badge">{printComensales} raciones por comida</div>
+            <div className="pr-pac-name">
+                <User size={18}/>
+                <div>Plan nutricional para: <strong>{paciente?.nombre}</strong></div>
+            </div>
+            <div className="pr-racion-badge">
+                {printComensales} {printComensales === 1 ? 'ración' : 'raciones'} por comida
+            </div>
         </div>
 
         <h2 className="pr-titulo-sem">Menú Semanal: {tituloSem}</h2>
@@ -405,10 +513,10 @@ export default function PlanningPacientePage() {
             <tbody>
                 {dias.map((d, i) => (
                 <tr key={i}>
-                    <td className="pr-dia-celda">{DIAS_LARGO[i]} <br/>{d.getDate()} {MESES[d.getMonth()]}</td>
+                    <td className="pr-dia-celda">{DIAS_LARGO[i]} <br/><span style={{fontWeight: '500', color: '#6A8378', fontSize: 12}}>{d.getDate()} {MESES[d.getMonth()]}</span></td>
                     {TIPOS.map(t => {
-                    const slot = getSlot(d, t.key);
-                    return <td key={t.key}>{slot ? <span className="pr-receta-txt">{slot.recetas?.titulo}</span> : '—'}</td>
+                    const slot = getSlot(d, t.key)
+                    return <td key={t.key}>{slot ? <span className="pr-receta-txt">{slot.recetas?.titulo}</span> : <span style={{color: '#B7C4BD'}}>—</span>}</td>
                     })}
                 </tr>
                 ))}
@@ -416,44 +524,69 @@ export default function PlanningPacientePage() {
             </table>
         </div>
 
-        {recetasImprimir.map(receta => (
-          <div key={receta.id} className="pr-body-content">
-            <div className="pr-receta">
-              <h3>{receta.titulo}</h3>
-              <div className="pr-meta-group">
-                <div className="pr-meta-item"><Clock3 size={15}/> Preparación: {receta.tiempo_preparacion} min</div>
-                <div className="pr-meta-item"><Zap size={15}/> Cocción: {receta.tiempo_coccion} min</div>
-              </div>
-              <div className="pr-grid">
-                <div>
-                  <h4>Ingredientes</h4>
-                  <ul className="pr-ing-list">
-                    {receta.receta_ingredientes?.map((ing, idx) => (
-                      <li key={idx}><strong>{Math.round((ing.cantidad / (receta.comensales_base || 2)) * printComensales * 100) / 100} {ing.unidad}</strong> de {ing.ingredientes?.nombre}</li>
-                    ))}
-                  </ul>
+        {recetasImprimir.length > 0 && (
+          <div className="pr-body-content">
+            <h2 className="pr-seccion-titulo">Detalles y Preparación de Recetas</h2>
+            {recetasImprimir.map(receta => (
+              <div key={receta.id} className="pr-receta">
+                <h3>{receta.titulo}</h3>
+                <div className="pr-meta-group">
+                  {receta.tiempo_preparacion && (
+                    <div className="pr-meta-item"><Clock3 size={15}/> Preparación: {receta.tiempo_preparacion} min</div>
+                  )}
+                  {receta.tiempo_coccion && (
+                    <div className="pr-meta-item"><Zap size={15}/> Cocción: {receta.tiempo_coccion} min</div>
+                  )}
                 </div>
-                <div>
-                  <h4>Preparación</h4>
-                  <ol className="pr-pasos-list">{receta.pasos?.map((paso, idx) => <li key={idx}>{paso.texto || paso}</li>)}</ol>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
 
-        {/* LISTA COMPRA */}
-        <div className="pr-lista-compra">
+                <div className="pr-grid">
+                  <div>
+                    <h4>Ingredientes necesarios</h4>
+                    <ul className="pr-ing-list">
+                      {receta.receta_ingredientes?.length > 0 
+                        ? receta.receta_ingredientes.map((ing, idx) => {
+                            const comBase = receta.comensales_base || 2; 
+                            let cantidadAjustada = Math.round(((ing.cantidad / comBase) * printComensales) * 100) / 100;
+                            return (
+                              <li key={idx}><strong>{cantidadAjustada} {ing.unidad}</strong> de {ing.ingredientes?.nombre}{ing.notas && <span style={{color:'#6A8378'}}> ({ing.notas})</span>}</li>
+                            )
+                          })
+                        : <li>Consultar ingredientes con el profesional.</li>
+                      }
+                    </ul>
+                  </div>
+                  <div>
+                    <h4>Pasos para la preparación</h4>
+                    <ol className="pr-pasos-list">
+                      {Array.isArray(receta.pasos) && receta.pasos.length > 0
+                        ? receta.pasos.map((paso, idx) => <li key={idx}>{typeof paso === 'string' ? paso : paso.texto}</li>)
+                        : <li>Consultar pasos de preparación con el profesional.</li>
+                      }
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* LISTA COMPRA SEMANAL EN PDF */}
+        {listaCompraPdf.length > 0 && (
+          <div className="pr-lista-compra">
             <h2 className="pr-seccion-titulo">Lista de la Compra Semanal</h2>
             <div className="pr-lista-grid">
               {listaCompraPdf.map((item, idx) => (
-                <div key={idx} className="pr-lista-item"><div className="pr-check"></div><strong>{Math.round(item.cantidad * 100) / 100} {item.unidad}</strong> de {item.nombre}</div>
+                <div key={idx} className="pr-lista-item">
+                  <div className="pr-check"></div>
+                  <span><strong>{Math.round(item.cantidad * 100) / 100} {item.unidad}</strong> de {item.nombre}</span>
+                </div>
               ))}
             </div>
             <div style={{ marginTop: 60, textAlign: 'center', borderTop: '1px solid #E2EBE4', paddingTop: 20 }}>
                 <p style={{ fontFamily: 'Fraunces', fontSize: 18, color: '#2D6A4F' }}>¡Mucho ánimo con tu nueva semana!</p>
             </div>
-        </div>
+          </div>
+        )}
       </div>
     </>
   )
