@@ -317,10 +317,19 @@ export default function Layout() {
         .btn-lg { padding: 13px 24px; font-size: 15px; }
         .btn-full { width: 100%; }
 
-        /* 🟢 NUEVO: Reglas de impresión globales 🟢 */
+        /* 🟢 NUEVO: Reglas de impresión globales corregidas 🟢 */
         @media print {
           /* Escondemos los menús siempre que se imprima algo */
           .sidebar, .bottom-nav { display: none !important; }
+          
+          /* Magia para que Chrome no corte la página a la mitad permitiendo múltiples folios */
+          html, body, #root, .app-shell, .main-content, .page-wrapper {
+            height: auto !important;
+            min-height: auto !important;
+            overflow: visible !important;
+            overflow-x: visible !important;
+            display: block !important;
+          }
           
           /* Le quitamos los márgenes al contenido principal para aprovechar el papel */
           .main-content {
