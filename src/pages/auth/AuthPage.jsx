@@ -69,7 +69,6 @@ export default function AuthPage() {
   const [regEmail,    setRegEmail]    = useState('')
   const [regPassword, setRegPassword] = useState('')
   const [regConfirm,  setRegConfirm]  = useState('')
-  const [regCodigo,   setRegCodigo]   = useState('')
 
   const reset = () => { setError(''); setSuccess('') }
 
@@ -115,8 +114,7 @@ export default function AuthPage() {
       password: regPassword,
       options: {
         data: {
-          nombre:       regNombre.trim(),
-          codigo_hogar: regCodigo.trim().toUpperCase() || null,
+          nombre: regNombre.trim(),
         },
       },
     })
@@ -141,8 +139,7 @@ export default function AuthPage() {
 
   // ── Crear perfil en base de datos ─────────────────────────
   const crearPerfilInicial = async (user) => {
-    const nombre      = user.user_metadata?.nombre      || 'Usuario'
-    const codigoHogar = user.user_metadata?.codigo_hogar || null
+    const nombre = user.user_metadata?.nombre || 'Usuario'
 
     await supabase.from('perfiles').upsert({
       id:    user.id,
@@ -150,21 +147,6 @@ export default function AuthPage() {
       email: user.email,
       hogar_id: null,
     }, { onConflict: 'id' })
-
-    if (codigoHogar) {
-      const { data: hogar } = await supabase
-        .from('hogares')
-        .select('id')
-        .eq('codigo_union', codigoHogar)
-        .single()
-
-      if (hogar) {
-        await supabase
-          .from('perfiles')
-          .update({ hogar_id: hogar.id })
-          .eq('id', user.id)
-      }
-    }
   }
 
   return (
@@ -236,7 +218,6 @@ export default function AuthPage() {
         .tab-btn.active { background: white; color: var(--brand); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
         .form-body { display: flex; flex-direction: column; gap: 14px; }
-        .optional-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); padding-top: 4px; }
 
         .field { display: flex; flex-direction: column; gap: 6px; }
         .field label { font-size: 13px; font-weight: 600; color: var(--text-2); }
@@ -333,15 +314,6 @@ export default function AuthPage() {
               <Field label="Email" type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="tu@email.com" icon={Mail} required />
               <Field label="Contraseña" type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="Mínimo 6 caracteres" icon={Lock} required />
               <Field label="Repite la contraseña" type="password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} placeholder="••••••••" icon={Lock} required />
-
-              <div className="optional-label">Código de hogar (opcional)</div>
-              <Field
-                label="Código de invitación"
-                value={regCodigo}
-                onChange={e => setRegCodigo(e.target.value)}
-                placeholder="Ej: A1B2C3D4"
-                extra="Si tienes un código, te unirás al hogar de alguien. Si no, crearás el tuyo en el siguiente paso."
-              />
 
               {error   && <div className="alert error">{error}</div>}
               {success && <div className="alert success">{success}</div>}
