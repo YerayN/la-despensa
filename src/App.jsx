@@ -14,13 +14,6 @@ import ComunidadPage    from './pages/ComunidadPage'
 import AjustesPage      from './pages/AjustesPage'
 
 // ─── Pantalla de carga ────────────────────────────────────────
-const loadingStyles = `
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1) }
-    50% { opacity: .7; transform: scale(.96) }
-  }
-`
-
 function LoadingScreen() {
   return (
     <div style={{
@@ -33,7 +26,6 @@ function LoadingScreen() {
       background: '#F6F8F6',
       fontFamily: "'DM Sans', sans-serif",
     }}>
-      <style>{loadingStyles}</style>   {/* ← ahora es estable entre renders */}
       <div style={{
         width: 52, height: 52,
         background: 'linear-gradient(135deg, #2D6A4F, #40916C)',
@@ -45,12 +37,14 @@ function LoadingScreen() {
       }}>
         🥘
       </div>
+      <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(.96)} }`}</style>
     </div>
   )
 }
 
 // ─── Guardas de ruta ─────────────────────────────────────────
 
+// Solo para usuarios NO autenticados (login/registro)
 function PublicOnlyRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
@@ -58,6 +52,7 @@ function PublicOnlyRoute({ children }) {
   return children
 }
 
+// Requiere sesión activa (cualquier usuario logueado)
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
@@ -65,12 +60,22 @@ function PrivateRoute({ children }) {
   return children
 }
 
+// Requiere sesión + perfil cargado + hogar configurado
 function AppRoute({ children }) {
   const { user, perfil, loading } = useAuth()
+
+  // Todavía inicializando
   if (loading) return <LoadingScreen />
+
+  // Sin sesión → login
   if (!user) return <Navigate to="/auth" replace />
-  if (perfil === null) return <LoadingScreen />
-  if (!perfil?.hogar_id) return <Navigate to="/setup-hogar" replace />
+
+  // Perfil aún cargando (undefined = no sabemos todavía)
+  if (perfil === undefined) return <LoadingScreen />
+
+  // Sin perfil o sin hogar → setup
+  if (!perfil || !perfil.hogar_id) return <Navigate to="/setup-hogar" replace />
+
   return children
 }
 

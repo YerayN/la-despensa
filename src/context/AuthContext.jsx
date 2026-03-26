@@ -4,23 +4,31 @@ import { supabase } from '../lib/supabase'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]     = useState(null)
-  const [perfil, setPerfil] = useState(null)
-  const [hogar, setHogar]   = useState(null)
+  const [user,    setUser]    = useState(null)
+  const [perfil,  setPerfil]  = useState(undefined)   // undefined = aún no sabemos
+  const [hogar,   setHogar]   = useState(null)
   const [loading, setLoading] = useState(true)
 
   const loadPerfil = useCallback(async (userId) => {
-    const { data, error } = await supabase
-      .from('perfiles')
-      .select('*, hogares(*)')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*, hogares(*)')
+        .eq('id', userId)
+        .single()
 
-    if (error || !data) return null
+      if (error || !data) {
+        setPerfil(null)
+        return null
+      }
 
-    setPerfil(data)
-    if (data.hogares) setHogar(data.hogares)
-    return data
+      setPerfil(data)
+      if (data.hogares) setHogar(data.hogares)
+      return data
+    } catch {
+      setPerfil(null)
+      return null
+    }
   }, [])
 
   const clearAuth = useCallback(() => {
@@ -40,9 +48,12 @@ export function AuthProvider({ children }) {
         if (session?.user) {
           setUser(session.user)
           await loadPerfil(session.user.id)
+        } else {
+          setPerfil(null)
         }
       } catch (e) {
         console.error('Error inicializando auth:', e)
+        if (mounted) setPerfil(null)
       } finally {
         if (mounted) setLoading(false)
       }
@@ -75,6 +86,17 @@ export function AuthProvider({ children }) {
     }
   }, [loadPerfil, clearAuth])
 
+  // signOut robusto: limpia estado local inmediatamente y luego llama a Supabase
+  const signOut = useCallback(async () => {
+    clearAuth()
+    setLoading(false)
+    try {
+      await supabase.auth.signOut()
+    } catch (e) {
+      console.error('Error en signOut:', e)
+    }
+  }, [clearAuth])
+
   const value = {
     user,
     perfil,
@@ -83,7 +105,7 @@ export function AuthProvider({ children }) {
     setPerfil,
     setHogar,
     loadPerfil,
-    signOut: () => supabase.auth.signOut(),
+    signOut,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
