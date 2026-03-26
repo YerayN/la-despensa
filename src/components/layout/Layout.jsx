@@ -105,13 +105,12 @@ export default function Layout() {
 
           .sidebar-logo-icon {
             width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-            border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            color: white;
-            font-size: 18px;
             flex-shrink: 0;
-            box-shadow: 0 2px 10px rgba(45,106,79,0.2);
+          }
+
+          .sidebar-logo-icon img {
+            width: 100%; height: 100%; object-fit: contain;
           }
 
           .sidebar-logo-text {
@@ -474,7 +473,9 @@ export default function Layout() {
         {/* ── Sidebar escritorio ── */}
         <aside className="sidebar">
           <div className="sidebar-logo">
-            <div className="sidebar-logo-icon">🥘</div>
+            <div className="sidebar-logo-icon">
+              <img src="/logo.png" alt="Logo" />
+            </div>
             <span className="sidebar-logo-text">La Despensa</span>
           </div>
 

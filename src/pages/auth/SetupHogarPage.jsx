@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Minus, Plus, ArrowRight, ChefHat } from 'lucide-react'
+import { Minus, Plus, ArrowRight } from 'lucide-react'
 
 export default function SetupHogarPage() {
   const navigate = useNavigate()
@@ -35,8 +35,6 @@ export default function SetupHogarPage() {
             id: user.id,
             nombre: user.user_metadata?.nombre || 'Usuario',
             email:  user.email
-            // AQUÍ ESTABA EL PROBLEMA: Hemos eliminado la línea hogar_id: null.
-            // Ahora, si hace upsert, nunca borrará tu hogar.
           }, { onConflict: 'id' })
           
           await loadPerfil(user.id)
@@ -122,12 +120,12 @@ export default function SetupHogarPage() {
         minHeight:'100dvh', display:'flex', alignItems:'center',
         justifyContent:'center', background:'#F8FAF8',
       }}>
-        <div style={{
-          width:52, height:52, background:'linear-gradient(135deg,#2D6A4F,#40916C)',
-          borderRadius:16, display:'flex', alignItems:'center',
-          justifyContent:'center', fontSize:26,
-          animation:'pulse 1.5s ease-in-out infinite',
-        }}>🥘</div>
+        {/* 🟢 NUEVO: Aquí aparece tu logo en lugar de la paella 🟢 */}
+        <img src="/logo.png" alt="Cargando..." style={{
+          width: 60, height: 60,
+          objectFit: 'contain',
+          animation: 'pulse 1.5s ease-in-out infinite',
+        }} />
         <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}`}</style>
       </div>
     )
@@ -150,11 +148,19 @@ export default function SetupHogarPage() {
           justify-content:center;padding:24px 16px;
           background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(64,145,108,.12) 0%,transparent 70%),var(--bg);}
         .logo{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px;}
-        .logo-icon{width:60px;height:60px;border-radius:18px;
-          background:linear-gradient(135deg,#2D6A4F,#40916C);
-          display:flex;align-items:center;justify-content:center;color:white;
-          box-shadow:0 4px 20px rgba(45,106,79,.25);}
-        .logo-name{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);}
+        
+        /* 🟢 NUEVO: Contenedor del logo sin fondo verde 🟢 */
+        .logo-icon-container {
+          width: 80px; height: 80px;
+          display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* 🟢 NUEVO: Imagen del logo nítida 🟢 */
+        .logo-img {
+          width: 100%; height: 100%; object-fit: contain;
+        }
+
+        .logo-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; }
         .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;
           padding:32px 28px;box-shadow:0 8px 40px rgba(45,106,79,.12);width:100%;max-width:420px;}
         .card-header{text-align:center;margin-bottom:28px;}
@@ -202,7 +208,10 @@ export default function SetupHogarPage() {
 
       <div className="page">
         <div className="logo">
-          <div className="logo-icon"><ChefHat size={28} /></div>
+          {/* 🟢 NUEVO: Contenedor del logo actualizado 🟢 */}
+          <div className="logo-icon-container">
+            <img src="/logo.png" alt="Logo La Despensa" className="logo-img" />
+          </div>
           <div className="logo-name">La Despensa</div>
         </div>
 

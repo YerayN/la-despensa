@@ -20,14 +20,11 @@ function LoadingScreen() {
       alignItems: 'center', justifyContent: 'center', gap: 16,
       background: '#F6F8F6', fontFamily: "'DM Sans', sans-serif",
     }}>
-      <div style={{
-        width: 52, height: 52,
-        background: 'linear-gradient(135deg, #2D6A4F, #40916C)',
-        borderRadius: 16, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: 26,
+      <img src="/logo.png" alt="Cargando..." style={{
+        width: 60, height: 60,
+        objectFit: 'contain',
         animation: 'pulse 1.5s ease-in-out infinite',
-        boxShadow: '0 4px 20px rgba(45,106,79,0.25)',
-      }}>🥘</div>
+      }} />
       <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}`}</style>
     </div>
   )

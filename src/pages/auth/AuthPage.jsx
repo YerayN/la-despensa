@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, ChefHat } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from 'lucide-react'
 
 // ─── Subcomponente: campo de texto ───────────────────────────
 function Field({ label, type = 'text', value, onChange, placeholder, icon: Icon, required, extra }) {
@@ -193,13 +193,19 @@ export default function AuthPage() {
         }
 
         .logo { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 32px; }
-        .logo-icon {
-          width: 60px; height: 60px; border-radius: 18px;
-          background: linear-gradient(135deg, #2D6A4F, #40916C);
-          display: flex; align-items: center; justify-content: center; color: white;
-          box-shadow: 0 4px 20px rgba(45,106,79,0.25);
+        
+        /* 🟢 NUEVO: Contenedor del logo sin fondo verde 🟢 */
+        .logo-icon-container {
+          width: 80px; height: 80px;
+          display: flex; align-items: center; justify-content: center;
         }
-        .logo-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); }
+        
+        /* 🟢 NUEVO: Imagen del logo nítida 🟢 */
+        .logo-img {
+          width: 100%; height: 100%; object-fit: contain;
+        }
+
+        .logo-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; }
         .logo-tagline { font-size: 13px; color: var(--text-3); }
 
         .card {
@@ -280,7 +286,10 @@ export default function AuthPage() {
 
       <div className="auth-page">
         <div className="logo">
-          <div className="logo-icon"><ChefHat size={28} /></div>
+          {/* 🟢 NUEVO: Contenedor del logo actualizado 🟢 */}
+          <div className="logo-icon-container">
+            <img src="/logo.png" alt="Logo La Despensa" className="logo-img" />
+          </div>
           <div className="logo-name">La Despensa</div>
           <div className="logo-tagline">Planifica, cocina, comparte</div>
         </div>
