@@ -30,8 +30,6 @@ export default function Layout() {
     if (to === '/') return location.pathname === '/'
     return location.pathname.startsWith(to)
   }
-  
-  // ... (aquí sigue tu código del return tal y como estaba)
 
   return (
     <>
@@ -79,7 +77,7 @@ export default function Layout() {
         .app-shell {
           display: flex;
           min-height: 100dvh;
-          overflow-x: hidden;   /* ← evita scroll horizontal global */
+          overflow-x: hidden;
           width: 100%;
         }
 
@@ -87,7 +85,7 @@ export default function Layout() {
            SIDEBAR — visible en escritorio
         ════════════════════════════════ */
         .sidebar {
-          display: none; /* oculto en móvil */
+          display: none;
         }
 
         @media (min-width: 768px) {
@@ -113,7 +111,6 @@ export default function Layout() {
             margin-bottom: 8px;
           }
 
-          /* 🟢 NUEVO: Estilos del logo transparente 🟢 */
           .sidebar-logo-icon {
             width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
@@ -327,7 +324,6 @@ export default function Layout() {
         .btn-lg { padding: 13px 24px; font-size: 15px; }
         .btn-full { width: 100%; }
 
-        /* 🟢 ESTO ES LO QUE HABÍA BORRADO SIN QUERER 🟢 */
         .input-field { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 15px; color: var(--text); background: var(--surface); outline: none; transition: border-color var(--transition), box-shadow var(--transition); -webkit-appearance: none; }
         .input-field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
         .input-field::placeholder { color: var(--text-3); }
@@ -367,7 +363,6 @@ export default function Layout() {
         {/* ── Sidebar escritorio ── */}
         <aside className="sidebar">
           <div className="sidebar-logo">
-            {/* 🟢 NUEVO: Logo transparente cargado 🟢 */}
             <div className="sidebar-logo-icon">
               <img src="/logo.png" alt="Logo" />
             </div>
@@ -375,7 +370,7 @@ export default function Layout() {
           </div>
 
           <nav className="sidebar-nav">
-            {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            {navItems.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -408,7 +403,7 @@ export default function Layout() {
 
         {/* ── Bottom nav móvil ── */}
         <nav className="bottom-nav">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
