@@ -41,7 +41,7 @@ function PublicOnlyRoute({ children }) {
   return children
 }
 
-// Cualquier usuario CON sesión
+// Cualquier usuario CON sesión, sin importar si tiene hogar o no
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
@@ -52,10 +52,9 @@ function PrivateRoute({ children }) {
 // Sesión + perfil cargado + hogar configurado
 function AppRoute({ children }) {
   const { user, perfil, loading } = useAuth()
-  if (loading)              return <LoadingScreen />
-  if (!user)                return <Navigate to="/auth" replace />
-  if (perfil === undefined) return <LoadingScreen />   // aún cargando perfil
-  if (!perfil?.hogar_id)   return <Navigate to="/setup-hogar" replace />
+  if (loading || perfil === undefined) return <LoadingScreen />
+  if (!user) return <Navigate to="/auth" replace />
+  if (!perfil?.hogar_id) return <Navigate to="/setup-hogar" replace />
   return children
 }
 

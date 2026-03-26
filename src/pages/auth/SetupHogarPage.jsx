@@ -6,46 +6,34 @@ import { Minus, Plus, ArrowRight, ChefHat } from 'lucide-react'
 
 export default function SetupHogarPage() {
   const navigate = useNavigate()
-  const { user, setHogar, loadPerfil } = useAuth()
+  const { user, perfil, setHogar, loadPerfil } = useAuth()
 
-  const [modo,      setModo]      = useState(null)  // null | 'crear' | 'unirse'
+  const [modo,      setModo]      = useState(null)
   const [loading,   setLoading]   = useState(false)
   const [iniciando, setIniciando] = useState(true)
   const [error,     setError]     = useState('')
   const [nombre,    setNombre]    = useState('')
   const [comensales,setComensales]= useState(2)
   const [codigo,    setCodigo]    = useState('')
-  const [userName,  setUserName]  = useState('')
+  
+  const userName = user?.user_metadata?.nombre?.split(' ')[0] || ''
 
-  // Inicialización: consultar BD directamente para evitar estados intermedios del contexto
   useEffect(() => {
     if (!user) return
+    
+    // Si ya detectamos que tiene hogar en el contexto, salimos de aquí
+    if (perfil?.hogar_id) {
+      navigate('/', { replace: true })
+      return
+    }
+
     let cancelled = false
 
     const init = async () => {
       setIniciando(true)
 
-      // Nombre para el saludo
-      setUserName(user.user_metadata?.nombre?.split(' ')[0] || '')
-
-      // Leer perfil directamente de Supabase
-      const { data: p } = await supabase
-        .from('perfiles')
-        .select('id, hogar_id')
-        .eq('id', user.id)
-        .single()
-
-      if (cancelled) return
-
-      // Ya tiene hogar → salir
-      if (p?.hogar_id) {
-        await loadPerfil(user.id)
-        navigate('/', { replace: true })
-        return
-      }
-
-      // No existe perfil → crearlo
-      if (!p) {
+      // Si no existe perfil en absoluto, lo creamos
+      if (perfil === null) {
         await supabase.from('perfiles').upsert({
           id: user.id,
           nombre: user.user_metadata?.nombre || 'Usuario',
@@ -55,29 +43,36 @@ export default function SetupHogarPage() {
         await loadPerfil(user.id)
       }
 
-      // Código de invitación en metadata (puesto durante el registro)
+      // Comprobar si hay código de invitación pendiente
       const codigoMeta = user.user_metadata?.codigo_hogar?.trim().toUpperCase()
       if (codigoMeta) {
         const { data: hogarEncontrado } = await supabase
           .from('hogares').select('*').eq('codigo_union', codigoMeta).single()
 
-        if (hogarEncontrado) {
+        if (hogarEncontrado && !cancelled) {
           await supabase.from('perfiles').update({ hogar_id: hogarEncontrado.id }).eq('id', user.id)
           await supabase.auth.updateUser({ data: { codigo_hogar: null } })
           await loadPerfil(user.id)
-          if (!cancelled) navigate('/', { replace: true })
+          // El propio useEffect detectará el cambio de perfil y redirigirá en el siguiente render
           return
         }
-        // Código inválido → pre-rellenar y mostrar formulario
-        if (!cancelled) { setCodigo(codigoMeta); setModo('unirse') }
+        
+        if (!cancelled) { 
+          setCodigo(codigoMeta); 
+          setModo('unirse') 
+        }
       }
 
       if (!cancelled) setIniciando(false)
     }
 
-    init()
+    // Solo ejecutamos la lógica inicial si ya sabemos con certeza que el perfil cargó pero no tiene hogar
+    if (perfil !== undefined && !perfil?.hogar_id) {
+      init()
+    }
+
     return () => { cancelled = true }
-  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, perfil, loadPerfil, navigate])
 
   const handleCrear = async (e) => {
     e.preventDefault()
@@ -85,7 +80,7 @@ export default function SetupHogarPage() {
     if (!nombre.trim()) { setError('Escribe un nombre para el hogar.'); return }
     setLoading(true)
 
-    const { data: hogar, error: errH } = await supabase
+    const { data: hogarNuevo, error: errH } = await supabase
       .from('hogares')
       .insert({ nombre: nombre.trim(), num_comensales: comensales })
       .select().single()
@@ -93,13 +88,12 @@ export default function SetupHogarPage() {
     if (errH) { setError('No se pudo crear el hogar. Inténtalo de nuevo.'); setLoading(false); return }
 
     const { error: errP } = await supabase
-      .from('perfiles').update({ hogar_id: hogar.id }).eq('id', user.id)
+      .from('perfiles').update({ hogar_id: hogarNuevo.id }).eq('id', user.id)
 
     if (errP) { setError('Error al actualizar tu perfil.'); setLoading(false); return }
 
-    setHogar(hogar)
+    setHogar(hogarNuevo)
     await loadPerfil(user.id)
-    navigate('/', { replace: true })
   }
 
   const handleUnirse = async (e) => {
@@ -109,22 +103,21 @@ export default function SetupHogarPage() {
     if (!cod) { setError('Introduce el código de invitación.'); return }
     setLoading(true)
 
-    const { data: hogar, error: errB } = await supabase
+    const { data: hogarEncontrado, error: errB } = await supabase
       .from('hogares').select('*').eq('codigo_union', cod).single()
 
-    if (errB || !hogar) {
+    if (errB || !hogarEncontrado) {
       setError('Código no encontrado. Comprueba que lo has escrito bien.')
       setLoading(false); return
     }
 
     const { error: errP } = await supabase
-      .from('perfiles').update({ hogar_id: hogar.id }).eq('id', user.id)
+      .from('perfiles').update({ hogar_id: hogarEncontrado.id }).eq('id', user.id)
 
     if (errP) { setError('Error al unirte al hogar.'); setLoading(false); return }
 
-    setHogar(hogar)
+    setHogar(hogarEncontrado)
     await loadPerfil(user.id)
-    navigate('/', { replace: true })
   }
 
   if (iniciando) {

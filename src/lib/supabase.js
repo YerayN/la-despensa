@@ -12,10 +12,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnon, {
     persistSession:     true,
     autoRefreshToken:   true,
     detectSessionInUrl: true,
-    // Fix: evita el error de lock en móvil cuando hay múltiples pestañas
-    // o cuando el navegador móvil libera el lock prematuramente
-    lock: async (name, acquireTimeout, fn) => {
-      // Implementación sin Web Locks API — funciona en todos los navegadores
+    storage: window.localStorage,
+    lock: (name, acquireTimeout, fn) => {
+      // Implementación directa para evitar cuelgues de Web Locks en Safari/móvil
       return fn()
     },
   },

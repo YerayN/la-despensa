@@ -1,39 +1,38 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(null)
-  const [perfil,  setPerfil]  = useState(undefined)
-  const [hogar,   setHogar]   = useState(null)
+  const [user, setUser] = useState(null)
+  const [perfil, setPerfil] = useState(undefined)
+  const [hogar, setHogar] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const perfilTokenRef = useRef(null)
-
   const loadPerfil = useCallback(async (userId) => {
-    const token = Symbol()
-    perfilTokenRef.current = token
     try {
       const { data, error } = await supabase
         .from('perfiles')
         .select('*, hogares(*)')
         .eq('id', userId)
         .single()
-      if (perfilTokenRef.current !== token) return null
-      if (error || !data) { setPerfil(null); setHogar(null); return null }
+
+      if (error || !data) {
+        setPerfil(null)
+        setHogar(null)
+        return null
+      }
       setPerfil(data)
       setHogar(data.hogares ?? null)
       return data
     } catch {
-      if (perfilTokenRef.current !== token) return null
       setPerfil(null)
+      setHogar(null)
       return null
     }
   }, [])
 
   const clearAuth = useCallback(() => {
-    perfilTokenRef.current = null
     setUser(null)
     setPerfil(null)
     setHogar(null)
@@ -42,48 +41,44 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    const init = async () => {
+    const initSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
         if (!mounted) return
+
+        if (error) throw error
+
         if (session?.user) {
           setUser(session.user)
           await loadPerfil(session.user.id)
         } else {
-          setPerfil(null)
+          clearAuth()
         }
       } catch (e) {
-        console.error('Auth init error:', e)
-        if (mounted) setPerfil(null)
+        console.error('Error inicializando sesión:', e)
+        if (mounted) clearAuth()
       } finally {
         if (mounted) setLoading(false)
       }
     }
 
-    init()
+    initSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Si ya tenemos perfil de este usuario = reactivación, no login nuevo
-          if (perfilTokenRef.current && perfil?.id === session.user.id) {
-            setUser(session.user)
-            loadPerfil(session.user.id) // silencioso, sin await
-          } else {
-            setLoading(true)
-            setUser(session.user)
-            await loadPerfil(session.user.id)
-            if (mounted) setLoading(false)
-          }
+          setUser(session.user)
+          // Solo ponemos estado de carga y recargamos si el usuario es nuevo o no tiene perfil
+          setLoading(true)
+          await loadPerfil(session.user.id)
+          setLoading(false)
         } else if (event === 'SIGNED_OUT') {
           clearAuth()
           setLoading(false)
-        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          setUser(session.user)
-        } else if (event === 'USER_UPDATED' && session?.user) {
-          setUser(session.user)
+        } else if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          if (session?.user) setUser(session.user)
         }
       }
     )
@@ -92,12 +87,18 @@ export function AuthProvider({ children }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [loadPerfil, clearAuth, perfil])
+  }, [loadPerfil, clearAuth])
 
   const signOut = useCallback(async () => {
-    clearAuth()
-    setLoading(false)
-    try { await supabase.auth.signOut() } catch (e) { console.error(e) }
+    setLoading(true)
+    try { 
+      await supabase.auth.signOut() 
+    } catch (e) { 
+      console.error(e) 
+    } finally {
+      clearAuth()
+      setLoading(false)
+    }
   }, [clearAuth])
 
   return (
