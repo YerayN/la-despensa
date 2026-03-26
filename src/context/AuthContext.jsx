@@ -19,8 +19,14 @@ export function AuthProvider({ children }) {
 
       if (error) {
         console.error("Error al cargar perfil:", error)
-        // Si hay un error de red, evitamos borrar el perfil si ya lo teníamos
-        setPerfil(prev => prev !== undefined ? prev : null)
+        // PGRST116 es el código exacto de Supabase para "No se encontró la fila"
+        if (error.code === 'PGRST116') {
+          setPerfil(null)
+          setHogar(null)
+          return null
+        }
+        // Si es cualquier otro error (red, lag...), NO ponemos null. 
+        // Así evitamos que la app crea que eres un usuario nuevo y te borre cosas.
         return null
       }
 
@@ -35,7 +41,6 @@ export function AuthProvider({ children }) {
       return data
     } catch (e) {
       console.error("Excepción en loadPerfil:", e)
-      setPerfil(prev => prev !== undefined ? prev : null)
       return null
     }
   }, [])
@@ -78,8 +83,6 @@ export function AuthProvider({ children }) {
 
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user)
-          // IMPORTANTE: Aquí estaba el error. Ya no bloqueamos la app con setLoading(true).
-          // La carga se hace de fondo de manera invisible.
           await loadPerfil(session.user.id)
         } else if (event === 'SIGNED_OUT') {
           clearAuth()

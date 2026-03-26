@@ -19,7 +19,6 @@ export default function SetupHogarPage() {
   const userName = user?.user_metadata?.nombre?.split(' ')[0] || ''
 
   useEffect(() => {
-    // Si aún estamos comprobando quién es el usuario, no hacemos nada de nada
     if (!user || perfil === undefined) return
     
     if (perfil?.hogar_id) {
@@ -35,12 +34,12 @@ export default function SetupHogarPage() {
           await supabase.from('perfiles').upsert({
             id: user.id,
             nombre: user.user_metadata?.nombre || 'Usuario',
-            email:  user.email,
-            hogar_id: null,
+            email:  user.email
+            // AQUÍ ESTABA EL PROBLEMA: Hemos eliminado la línea hogar_id: null.
+            // Ahora, si hace upsert, nunca borrará tu hogar.
           }, { onConflict: 'id' })
           
           await loadPerfil(user.id)
-          // Cortamos aquí porque loadPerfil actualizará el estado y volverá a lanzar esto limpio
           return 
         }
 
