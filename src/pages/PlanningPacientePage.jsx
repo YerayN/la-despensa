@@ -218,7 +218,12 @@ export default function PlanningPacientePage() {
           .print-only { display: block !important; width: 100%; font-family: 'DM Sans', sans-serif; }
           .pr-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #2D6A4F; padding-bottom: 15px; margin-bottom: 25px; }
           .pr-logo-box { display: flex; align-items: center; gap: 12px; }
-          .pr-logo-box img { width: 55px; height: 55px; object-fit: contain; border-radius: 8px; }
+          .pr-logo-box img { 
+            width: 60px; 
+            height: 60px; 
+            object-fit: contain; /* Esto hace que el logo mantenga su forma original */
+            border-radius: 4px; 
+            }
           .pr-logo-box h1 { font-family: 'Fraunces', serif; font-size: 26px; margin: 0; color: #2D6A4F; }
           .pr-nutri { text-align: right; font-size: 13px; color: #5A7366; }
           
