@@ -5,7 +5,7 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null)
-  const [perfil,  setPerfil]  = useState(undefined)  // undefined = todavía resolviendo
+  const [perfil,  setPerfil]  = useState(undefined)  // undefined = resolviendo
   const [hogar,   setHogar]   = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -23,10 +23,10 @@ export function AuthProvider({ children }) {
         .single()
 
       if (perfilTokenRef.current !== token) return null
-      if (error || !data) { setPerfil(null); return null }
+      if (error || !data) { setPerfil(null); setHogar(null); return null }
 
       setPerfil(data)
-      if (data.hogares) setHogar(data.hogares)
+      setHogar(data.hogares ?? null)
       return data
     } catch {
       if (perfilTokenRef.current !== token) return null
@@ -45,12 +45,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    // ── Inicialización: sesión ya persistida en el navegador ──────
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!mounted) return
-
         if (session?.user) {
           setUser(session.user)
           await loadPerfil(session.user.id)
@@ -67,39 +65,28 @@ export function AuthProvider({ children }) {
 
     init()
 
-    // ── Listener de cambios de sesión ─────────────────────────────
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Distinguir login real de reactivación tras inactividad:
-          // Si ya tenemos un perfil cargado para este mismo usuario,
-          // NO poner loading=true — solo actualizar el user silenciosamente.
-          // Si es un usuario diferente o no hay perfil, sí cargar.
-          const yaTenemosPerfilDeEsteUsuario =
-            perfil !== undefined && perfil !== null && perfil.id === session.user.id
-
-          if (yaTenemosPerfilDeEsteUsuario) {
-            // Reactivación tras inactividad — refrescar datos sin bloquear UI
+          const esElMismoUsuario = perfil?.id === session.user.id
+          if (esElMismoUsuario) {
+            // Reactivación tras inactividad — actualizar silenciosamente
             setUser(session.user)
-            loadPerfil(session.user.id)  // sin await: actualización silenciosa
+            loadPerfil(session.user.id)
           } else {
-            // Login real o cambio de usuario — bloquear UI mientras cargamos
+            // Login real
             setLoading(true)
             setUser(session.user)
             await loadPerfil(session.user.id)
             if (mounted) setLoading(false)
           }
-
         } else if (event === 'SIGNED_OUT') {
           clearAuth()
           setLoading(false)
-
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Refresco silencioso de token — solo actualizar user, nunca tocar loading
           setUser(session.user)
-
         } else if (event === 'USER_UPDATED' && session?.user) {
           setUser(session.user)
         }
@@ -115,25 +102,14 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     clearAuth()
     setLoading(false)
-    try {
-      await supabase.auth.signOut()
-    } catch (e) {
-      console.error('Error en signOut:', e)
-    }
+    try { await supabase.auth.signOut() } catch (e) { console.error(e) }
   }, [clearAuth])
 
-  const value = {
-    user,
-    perfil,
-    hogar,
-    loading,
-    setPerfil,
-    setHogar,
-    loadPerfil,
-    signOut,
-  }
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, perfil, hogar, loading, setPerfil, setHogar, loadPerfil, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
