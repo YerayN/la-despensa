@@ -17,17 +17,25 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .single()
 
-      if (error || !data) {
+      if (error) {
+        console.error("Error al cargar perfil:", error)
+        // Si hay un error de red, evitamos borrar el perfil si ya lo teníamos
+        setPerfil(prev => prev !== undefined ? prev : null)
+        return null
+      }
+
+      if (!data) {
         setPerfil(null)
         setHogar(null)
         return null
       }
+
       setPerfil(data)
       setHogar(data.hogares ?? null)
       return data
-    } catch {
-      setPerfil(null)
-      setHogar(null)
+    } catch (e) {
+      console.error("Excepción en loadPerfil:", e)
+      setPerfil(prev => prev !== undefined ? prev : null)
       return null
     }
   }, [])
@@ -70,13 +78,11 @@ export function AuthProvider({ children }) {
 
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user)
-          // Solo ponemos estado de carga y recargamos si el usuario es nuevo o no tiene perfil
-          setLoading(true)
+          // IMPORTANTE: Aquí estaba el error. Ya no bloqueamos la app con setLoading(true).
+          // La carga se hace de fondo de manera invisible.
           await loadPerfil(session.user.id)
-          setLoading(false)
         } else if (event === 'SIGNED_OUT') {
           clearAuth()
-          setLoading(false)
         } else if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           if (session?.user) setUser(session.user)
         }

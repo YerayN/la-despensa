@@ -13,9 +13,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnon, {
     autoRefreshToken:   true,
     detectSessionInUrl: true,
     storage: window.localStorage,
-    lock: (name, acquireTimeout, fn) => {
-      // Implementación directa para evitar cuelgues de Web Locks en Safari/móvil
-      return fn()
+    lock: async (name, acquireTimeout, fn) => {
+      // Usamos await para asegurar la compatibilidad con el entorno asíncrono de móviles
+      return await fn()
     },
   },
 })

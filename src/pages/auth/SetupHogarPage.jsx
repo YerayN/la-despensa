@@ -19,9 +19,9 @@ export default function SetupHogarPage() {
   const userName = user?.user_metadata?.nombre?.split(' ')[0] || ''
 
   useEffect(() => {
-    if (!user) return
+    // Si aún estamos comprobando quién es el usuario, no hacemos nada de nada
+    if (!user || perfil === undefined) return
     
-    // Si ya detectamos que tiene hogar en el contexto, salimos de aquí
     if (perfil?.hogar_id) {
       navigate('/', { replace: true })
       return
@@ -30,46 +30,43 @@ export default function SetupHogarPage() {
     let cancelled = false
 
     const init = async () => {
-      setIniciando(true)
-
-      // Si no existe perfil en absoluto, lo creamos
-      if (perfil === null) {
-        await supabase.from('perfiles').upsert({
-          id: user.id,
-          nombre: user.user_metadata?.nombre || 'Usuario',
-          email:  user.email,
-          hogar_id: null,
-        }, { onConflict: 'id' })
-        await loadPerfil(user.id)
-      }
-
-      // Comprobar si hay código de invitación pendiente
-      const codigoMeta = user.user_metadata?.codigo_hogar?.trim().toUpperCase()
-      if (codigoMeta) {
-        const { data: hogarEncontrado } = await supabase
-          .from('hogares').select('*').eq('codigo_union', codigoMeta).single()
-
-        if (hogarEncontrado && !cancelled) {
-          await supabase.from('perfiles').update({ hogar_id: hogarEncontrado.id }).eq('id', user.id)
-          await supabase.auth.updateUser({ data: { codigo_hogar: null } })
+      try {
+        if (perfil === null) {
+          await supabase.from('perfiles').upsert({
+            id: user.id,
+            nombre: user.user_metadata?.nombre || 'Usuario',
+            email:  user.email,
+            hogar_id: null,
+          }, { onConflict: 'id' })
+          
           await loadPerfil(user.id)
-          // El propio useEffect detectará el cambio de perfil y redirigirá en el siguiente render
-          return
+          // Cortamos aquí porque loadPerfil actualizará el estado y volverá a lanzar esto limpio
+          return 
         }
-        
-        if (!cancelled) { 
-          setCodigo(codigoMeta); 
-          setModo('unirse') 
+
+        const codigoMeta = user.user_metadata?.codigo_hogar?.trim().toUpperCase()
+        if (codigoMeta) {
+          const { data: hogarEncontrado } = await supabase
+            .from('hogares').select('*').eq('codigo_union', codigoMeta).single()
+
+          if (hogarEncontrado && !cancelled) {
+            await supabase.from('perfiles').update({ hogar_id: hogarEncontrado.id }).eq('id', user.id)
+            await supabase.auth.updateUser({ data: { codigo_hogar: null } })
+            await loadPerfil(user.id)
+            return
+          }
+          
+          if (!cancelled) { 
+            setCodigo(codigoMeta); 
+            setModo('unirse') 
+          }
         }
+      } finally {
+        if (!cancelled) setIniciando(false)
       }
-
-      if (!cancelled) setIniciando(false)
     }
 
-    // Solo ejecutamos la lógica inicial si ya sabemos con certeza que el perfil cargó pero no tiene hogar
-    if (perfil !== undefined && !perfil?.hogar_id) {
-      init()
-    }
+    init()
 
     return () => { cancelled = true }
   }, [user, perfil, loadPerfil, navigate])
