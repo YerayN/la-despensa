@@ -11,8 +11,11 @@ import RecetaForm     from './pages/RecetaForm'
 import PlanningPage   from './pages/PlanningPage'
 import ListaPage      from './pages/ListaPage'
 import ComunidadPage  from './pages/ComunidadPage'
-import ConsultaPage from './pages/ConsultaPage'
 import AjustesPage    from './pages/AjustesPage'
+
+// 🟢 NUEVAS PÁGINAS PARA PROFESIONALES 🟢
+import ConsultaPage         from './pages/ConsultaPage'
+import PlanningPacientePage from './pages/PlanningPacientePage'
 
 function LoadingScreen() {
   return (
@@ -22,8 +25,7 @@ function LoadingScreen() {
       background: '#F6F8F6', fontFamily: "'DM Sans', sans-serif",
     }}>
       <img src="/logo.png" alt="Cargando..." style={{
-        width: 60, height: 60,
-        objectFit: 'contain',
+        width: 60, height: 60, objectFit: 'contain',
         animation: 'pulse 1.5s ease-in-out infinite',
       }} />
       <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}`}</style>
@@ -31,7 +33,6 @@ function LoadingScreen() {
   )
 }
 
-// Solo usuarios SIN sesión (login/registro)
 function PublicOnlyRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
@@ -39,7 +40,6 @@ function PublicOnlyRoute({ children }) {
   return children
 }
 
-// Cualquier usuario CON sesión, sin importar si tiene hogar o no
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
@@ -47,7 +47,6 @@ function PrivateRoute({ children }) {
   return children
 }
 
-// Sesión + perfil cargado + hogar configurado
 function AppRoute({ children }) {
   const { user, perfil, loading } = useAuth()
   if (loading || perfil === undefined) return <LoadingScreen />
@@ -56,26 +55,21 @@ function AppRoute({ children }) {
   return children
 }
 
-// Solo para nutricionistas
+// 🟢 NUEVA BARRERA: Solo Nutricionistas 🟢
 function NutricionistaRoute({ children }) {
   const { user, perfil, loading } = useAuth()
   if (loading || perfil === undefined) return <LoadingScreen />
   if (!user) return <Navigate to="/auth" replace />
   if (!perfil?.hogar_id) return <Navigate to="/setup-hogar" replace />
-  if (!perfil?.es_nutricionista) return <Navigate to="/" replace /> // Si no es nutri, a la calle
+  if (!perfil?.es_nutricionista) return <Navigate to="/" replace />
   return children
 }
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/auth" element={
-        <PublicOnlyRoute><AuthPage /></PublicOnlyRoute>
-      } />
-
-      <Route path="/setup-hogar" element={
-        <PrivateRoute><SetupHogarPage /></PrivateRoute>
-      } />
+      <Route path="/auth" element={<PublicOnlyRoute><AuthPage /></PublicOnlyRoute>} />
+      <Route path="/setup-hogar" element={<PrivateRoute><SetupHogarPage /></PrivateRoute>} />
 
       <Route path="/" element={<AppRoute><Layout /></AppRoute>}>
         <Route index                     element={<DashboardPage />} />
@@ -86,8 +80,11 @@ export default function App() {
         <Route path="planning"           element={<PlanningPage />} />
         <Route path="lista"              element={<ListaPage />} />
         <Route path="comunidad"          element={<ComunidadPage />} />
-        <Route path="consulta/*"         element={<NutricionistaRoute><ConsultaPage /></NutricionistaRoute>} />
         <Route path="ajustes"            element={<AjustesPage />} />
+        
+        {/* 🟢 ZONA VIP NUTRICIONISTAS 🟢 */}
+        <Route path="consulta"               element={<NutricionistaRoute><ConsultaPage /></NutricionistaRoute>} />
+        <Route path="consulta/paciente/:id"  element={<NutricionistaRoute><PlanningPacientePage /></NutricionistaRoute>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

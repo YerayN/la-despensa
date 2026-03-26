@@ -108,7 +108,7 @@ export default function ConsultaPage() {
                     borderRadius: '12px', cursor: 'pointer', border: '1px solid var(--border)' 
                   }}
                   // En el próximo paso haremos que este botón abra SU planning
-                  onClick={() => alert(`En el siguiente paso abriremos la ficha de ${p.nombre}`)}
+                  onClick={() => navigate(`/consulta/paciente${p.id}`)}
                 >
                   <div>
                     <div style={{ fontWeight: 600, color: 'var(--text)' }}>{p.nombre}</div>
