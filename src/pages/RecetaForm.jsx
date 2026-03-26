@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { syncListaConPlanning } from '../lib/syncLista'
 import IngredientePicker from '../components/recetas/IngredientePicker'
 import {
-  ArrowLeft, Plus, Trash2, Camera, X, Loader
+  ArrowLeft, Plus, Trash2, Camera, X, Loader, Send
 } from 'lucide-react'
 
 const TIPOS = ['desayuno','almuerzo','comida','merienda','cena']
@@ -33,7 +33,7 @@ async function comprimirImagen(file, maxWidth = 1200, quality = 0.82) {
 }
 
 export default function RecetaForm() {
-  const { id } = useParams()          // si existe → modo edición
+  const { id } = useParams()
   const navigate  = useNavigate()
   const { user, hogar } = useAuth()
   const qc = useQueryClient()
@@ -57,17 +57,23 @@ export default function RecetaForm() {
   ])
 
   // ── Imagen ───────────────────────────────────────────────
-  const [imagenPreview, setImagenPreview] = useState(null) // URL preview local
-  const [imagenFile,    setImagenFile]    = useState(null) // File a subir
-  const [imagenUrl,     setImagenUrl]     = useState(null) // URL ya guardada (edición)
+  const [imagenPreview, setImagenPreview] = useState(null)
+  const [imagenFile,    setImagenFile]    = useState(null)
+  const [imagenUrl,     setImagenUrl]     = useState(null)
   const [subiendoImg,   setSubiendoImg]   = useState(false)
 
   // ── Estado general ───────────────────────────────────────
   const [error,   setError]   = useState('')
-  const [loading, setLoading] = useState(false)
 
   // ── Picker de ingredientes ───────────────────────────────────────
   const [pickerAbierto, setPickerAbierto] = useState(false)
+
+  // ── Sugerencia de ingredientes (Telegram) ────────────────────────
+  const [modalSugerencia, setModalSugerencia] = useState(false)
+  const [sugIngrediente,  setSugIngrediente]  = useState('')
+  const [sugPersona,      setSugPersona]      = useState(user?.user_metadata?.nombre || '')
+  const [sugEnviando,     setSugEnviando]     = useState(false)
+  const [sugMensaje,      setSugMensaje]      = useState('')
 
   // ── Cargar datos en modo edición ─────────────────────────
   const { data: recetaEditar } = useQuery({
@@ -83,7 +89,6 @@ export default function RecetaForm() {
     staleTime: Infinity,
   })
 
-  // Poblar formulario cuando llegan los datos (useEffect en vez de onSuccess, deprecado en v5)
   useEffect(() => {
     if (!esEdicion || !recetaEditar) return
     setTitulo(recetaEditar.titulo ?? '')
@@ -117,11 +122,10 @@ export default function RecetaForm() {
     }
   }, [recetaEditar])
 
-  // ── Seleccionar imagen ───────────────────────────────────
+  // ── Imágenes y envío de receta (sin cambios) ───────────────
   const handleImagenChange = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    // Preview inmediato
     setImagenPreview(URL.createObjectURL(file))
     setImagenFile(file)
   }
@@ -133,9 +137,8 @@ export default function RecetaForm() {
     if (fileRef.current) fileRef.current.value = ''
   }
 
-  // ── Subir imagen a Supabase Storage ─────────────────────
   const subirImagen = async () => {
-    if (!imagenFile) return imagenUrl // si no hay archivo nuevo, devuelve la URL existente
+    if (!imagenFile) return imagenUrl
     setSubiendoImg(true)
     try {
       const blob     = await comprimirImagen(imagenFile)
@@ -152,7 +155,6 @@ export default function RecetaForm() {
     }
   }
 
-  // ── Guardar receta ───────────────────────────────────────
   const guardar = useMutation({
     mutationFn: async () => {
       setError('')
@@ -160,11 +162,8 @@ export default function RecetaForm() {
       const pasosLimpios = pasos.filter(p => p.trim())
       if (pasosLimpios.length === 0) throw new Error('Añade al menos un paso de preparación.')
 
-      // Con el nuevo picker todos los ingredientes tienen id y cantidad garantizados
       const ingsValidos = ingredientes.filter(i => i.ingrediente_id && i.cantidad)
-
       const tagsArr = tags.split(',').map(t => t.trim()).filter(Boolean)
-
       const urlFinal = await subirImagen()
 
       const payload = {
@@ -208,8 +207,6 @@ export default function RecetaForm() {
         if (error) throw new Error(error.message)
       }
 
-      // Si es edición, recalcular lista para todos los slots del planning
-      // que usen esta receta en la semana actual
       if (esEdicion) {
         const hoy = new Date()
         const inicioSemana = new Date(hoy)
@@ -228,7 +225,6 @@ export default function RecetaForm() {
 
         for (const slot of slotsAfectados ?? []) {
           const comensalesSlot = slot.comensales ?? hogar.num_comensales ?? 2
-          // Restar ingredientes antiguos y sumar los nuevos (misma receta, puede haber cambiado)
           await syncListaConPlanning({
             supabase,
             hogarId:    slot.hogar_id,
@@ -253,6 +249,51 @@ export default function RecetaForm() {
     onError: (e) => setError(e.message),
   })
 
+  // ── Función para enviar a Telegram ──────────────────────────
+  const enviarSugerencia = async () => {
+    if (!sugIngrediente.trim()) return
+    setSugEnviando(true)
+    setSugMensaje('')
+    
+    try {
+      // Leeremos los datos desde las variables de entorno
+      const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN
+      const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID
+
+      if (!botToken || !chatId) {
+        throw new Error("Faltan las variables de entorno de Telegram.")
+      }
+
+      const texto = `🧑‍🍳 *Nueva sugerencia en La Despensa*\n\n` +
+                    `🍅 *Falta:* ${sugIngrediente}\n` +
+                    `👤 *Lo pide:* ${sugPersona || 'Alguien anónimo'}`
+
+      const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: texto,
+          parse_mode: 'Markdown'
+        })
+      })
+
+      if (!res.ok) throw new Error("Error de Telegram")
+
+      setSugMensaje('¡Sugerencia enviada! Gracias por ayudar.')
+      setTimeout(() => {
+        setModalSugerencia(false)
+        setSugIngrediente('')
+        setSugMensaje('')
+      }, 2500)
+
+    } catch (e) {
+      console.error(e)
+      setSugMensaje('Ha habido un error al enviar. Inténtalo más tarde.')
+    } finally {
+      setSugEnviando(false)
+    }
+  }
 
   // ── Helpers pasos ────────────────────────────────────────
   const updatePaso = (idx, val) => setPasos(p => p.map((s,n) => n === idx ? val : s))
@@ -338,23 +379,14 @@ export default function RecetaForm() {
 
         /* Ingredientes */
         .ing-item { display:flex; flex-direction:column; gap:8px; padding:14px; background:var(--surface-2); border-radius:var(--radius-sm); position:relative; }
-        .ing-busq-wrap { position:relative; }
-        .ing-dropdown {
-          position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:50;
-          background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-sm);
-          box-shadow:var(--shadow-md); max-height:200px; overflow-y:auto;
+        .btn-add-item {
+          display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 14px;
+          border:1.5px dashed var(--border); border-radius:var(--radius-sm);
+          background:transparent; color:var(--text-3); font-family:var(--font-body);
+          font-size:13px; font-weight:600; cursor:pointer; width:100%;
+          transition:all var(--transition);
         }
-        .ing-option {
-          display:flex; align-items:center; gap:10px; padding:10px 12px;
-          cursor:pointer; transition:background var(--transition); font-size:14px;
-        }
-        .ing-option:hover { background:var(--surface-2); }
-        .ing-remove {
-          position:absolute; top:10px; right:10px; width:24px; height:24px;
-          border-radius:6px; border:none; background:transparent; color:var(--text-3);
-          display:flex; align-items:center; justify-content:center; cursor:pointer;
-        }
-        .ing-remove:hover { background:var(--border); color:var(--text); }
+        .btn-add-item:hover { border-color:var(--brand); color:var(--brand); background:var(--brand-pale); }
 
         /* Pasos */
         .paso-item { display:flex; gap:10px; align-items:flex-start; }
@@ -363,14 +395,6 @@ export default function RecetaForm() {
           color:var(--brand-dark); font-size:13px; font-weight:700;
           display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:8px;
         }
-        .btn-add-item {
-          display:flex; align-items:center; gap:7px; padding:10px 14px;
-          border:1.5px dashed var(--border); border-radius:var(--radius-sm);
-          background:transparent; color:var(--text-3); font-family:var(--font-body);
-          font-size:13px; font-weight:600; cursor:pointer; width:100%;
-          transition:all var(--transition);
-        }
-        .btn-add-item:hover { border-color:var(--brand); color:var(--brand); background:var(--brand-pale); }
 
         .error-box { background:#FEF2F2; border:1.5px solid #FCA5A5; border-radius:var(--radius-sm); padding:12px 14px; font-size:13px; color:#DC2626; }
 
@@ -383,6 +407,17 @@ export default function RecetaForm() {
         .cnt-btn:hover { border-color:var(--brand); color:var(--brand); background:var(--brand-pale); }
         .cnt-btn:disabled { opacity:0.35; cursor:not-allowed; }
         .cnt-num { font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--brand); min-width:28px; text-align:center; }
+
+        /* Modal Sugerencia */
+        .modal-overlay {
+          position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:400;
+          display:flex; align-items:center; justify-content:center; padding:24px;
+        }
+        .modal-box {
+          background:var(--surface); border-radius:var(--radius); padding:24px;
+          width:100%; max-width:360px; box-shadow:var(--shadow-lg);
+          display:flex; flex-direction:column; gap:16px;
+        }
       `}</style>
 
       {/* Header */}
@@ -493,7 +528,7 @@ export default function RecetaForm() {
         )}
 
         {/* Lista de ingredientes añadidos */}
-        {ingredientes.filter(i => i.ingrediente_id).map((ing, idx) => (
+        {ingredientes.filter(i => i.ingrediente_id).map((ing) => (
           <div key={ing.ingrediente_id} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid var(--border)' }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>{ing.nombre}</div>
@@ -510,6 +545,16 @@ export default function RecetaForm() {
           onClick={() => setPickerAbierto(true)}>
           <Plus size={15} /> Añadir ingrediente
         </button>
+
+        {/* Botón sutil de sugerencia */}
+        <div style={{ textAlign: 'center', marginTop: 8 }}>
+          <button 
+            type="button" 
+            onClick={() => setModalSugerencia(true)} 
+            style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontSize: 13, textDecoration: 'underline', cursor: 'pointer' }}>
+            ¿Falta algún ingrediente? Sugiérelo aquí
+          </button>
+        </div>
       </div>
 
       {/* Picker de ingredientes */}
@@ -518,7 +563,6 @@ export default function RecetaForm() {
           onCerrar={() => setPickerAbierto(false)}
           onAñadir={(nuevo) => {
             setIngredientes(prev => {
-              // Si ya existe, actualizamos cantidad
               const existe = prev.find(i => i.ingrediente_id === nuevo.ingrediente_id)
               if (existe) return prev.map(i => i.ingrediente_id === nuevo.ingrediente_id ? { ...i, ...nuevo } : i)
               return [...prev.filter(i => i.ingrediente_id), nuevo]
@@ -526,6 +570,42 @@ export default function RecetaForm() {
             setPickerAbierto(false)
           }}
         />
+      )}
+
+      {/* Modal Sugerencia */}
+      {modalSugerencia && (
+        <div className="modal-overlay" onClick={() => !sugEnviando && setModalSugerencia(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <h3 style={{ fontFamily:'var(--font-display)', fontSize:18, color:'var(--text)' }}>Sugerir ingrediente</h3>
+              <button onClick={() => setModalSugerencia(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)' }}><X size={20}/></button>
+            </div>
+            <p style={{ fontSize:13, color:'var(--text-2)', lineHeight:1.4 }}>
+              ¿No encuentras algo? Dime qué falta y lo añadiré a la base de datos lo antes posible.
+            </p>
+            <div className="field">
+              <label>Ingrediente que falta *</label>
+              <input value={sugIngrediente} onChange={e => setSugIngrediente(e.target.value)} placeholder="Ej: Salsa de soja oscura" autoFocus />
+            </div>
+            <div className="field">
+              <label>Tu nombre (opcional)</label>
+              <input value={sugPersona} onChange={e => setSugPersona(e.target.value)} placeholder="Para saber a quién darle las gracias" />
+            </div>
+            {sugMensaje && (
+              <div style={{ padding:10, borderRadius:8, background:'var(--brand-pale)', color:'var(--brand-dark)', fontSize:13, textAlign:'center' }}>
+                {sugMensaje}
+              </div>
+            )}
+            <button 
+              className="btn btn-primary" 
+              style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 4 }}
+              onClick={enviarSugerencia} 
+              disabled={sugEnviando || !sugIngrediente.trim()}
+            >
+              {sugEnviando ? 'Enviando...' : <><Send size={16} /> Enviar sugerencia</>}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ── Pasos ── */}
@@ -537,7 +617,7 @@ export default function RecetaForm() {
             <div className="paso-num-badge">{idx + 1}</div>
             <textarea
               className="input-field"
-              style={{ flex:1, minHeight:72, resize:'vertical' }}
+              style={{ flex:1, minHeight:72, resize:'vertical', padding: '10px 13px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', outline: 'none' }}
               placeholder={`Paso ${idx + 1}...`}
               value={paso}
               onChange={e => updatePaso(idx, e.target.value)}
