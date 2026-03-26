@@ -40,6 +40,10 @@ export default function PlanningPage() {
   const [busq,    setBusq]    = useState('')
   const [slotCom, setSlotCom] = useState({})
 
+  // NUEVOS ESTADOS PARA IMPRESIÓN
+  const [showPrintModal, setShowPrintModal] = useState(false)
+  const [printComensales, setPrintComensales] = useState(1)
+
   const dias   = Array.from({ length:7 }, (_,i) => addDays(semana, i))
   const semKey = toStr(semana)
   const hoyStr = toStr(new Date())
@@ -49,7 +53,6 @@ export default function PlanningPage() {
     ? `${dias[0].getDate()}–${dias[6].getDate()} de ${MESES[dias[0].getMonth()]} ${dias[0].getFullYear()}`
     : `${dias[0].getDate()} ${MESES[dias[0].getMonth()]} – ${dias[6].getDate()} ${MESES[dias[6].getMonth()]}`
 
-  // AHORA NOS TRAEMOS TAMBIÉN LOS PASOS E INGREDIENTES PARA EL PDF
   const { data: planning = [] } = useQuery({
     queryKey: ['planning', hogar?.id, semKey],
     queryFn: async () => {
@@ -58,7 +61,7 @@ export default function PlanningPage() {
         .select(`
           id, fecha, tipo_comida, receta_id, comensales, 
           recetas(
-            id, titulo, tiempo_coccion, tiempo_preparacion, dificultad, pasos, 
+            id, titulo, tiempo_coccion, tiempo_preparacion, dificultad, pasos, comensales_base,
             receta_ingredientes(cantidad, unidad, notas, ingredientes(nombre))
           )
         `)
@@ -155,7 +158,6 @@ export default function PlanningPage() {
   const slotTipo = slot ? TIPOS.find(t => t.key === slot.tipo) : null
   const slotDiaIdx = slot ? dias.findIndex(d => toStr(d) === (typeof slot.fecha === 'string' ? slot.fecha : toStr(slot.fecha))) : -1
 
-  // PREPARAMOS LAS RECETAS UNICAS DE LA SEMANA PARA IMPRIMIRLAS AL FINAL
   const recetasImprimir = []
   const idsVistos = new Set()
   planning.forEach(p => {
@@ -164,6 +166,12 @@ export default function PlanningPage() {
       recetasImprimir.push(p.recetas)
     }
   })
+
+  // Función para manejar la impresión y cerrar el modal
+  const handleImprimir = () => {
+    window.print()
+    setShowPrintModal(false)
+  }
 
   return (
     <>
@@ -182,7 +190,9 @@ export default function PlanningPage() {
           cursor:pointer; color:var(--text-2); flex-shrink:0;
           transition:all var(--transition);
         }
-        .pln-btn:hover { background:var(--brand-pale); border-color:var(--brand); color:var(--brand); }
+        .pln-btn:hover:not(:disabled) { background:var(--brand-pale); border-color:var(--brand); color:var(--brand); }
+        .pln-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .pln-titulo {
           flex:1; text-align:center;
           font-family:var(--font-display); font-size:20px; font-weight:700;
@@ -207,33 +217,22 @@ export default function PlanningPage() {
 
         /* ── Grid días ── */
         .pln-grid {
-          display:grid;
-          grid-template-columns:1fr;
-          gap:16px;
+          display:grid; grid-template-columns:1fr; gap:16px;
         }
         @media(min-width:600px)  { .pln-grid { grid-template-columns:repeat(2,1fr); gap:16px; } }
         @media(min-width:1000px) { .pln-grid { grid-template-columns:repeat(3,1fr); gap:20px; } }
 
         /* ── Tarjeta día ── */
         .pln-dia {
-          background:var(--surface);
-          border:1.5px solid var(--border);
-          border-radius:20px;
-          overflow:hidden;
-          transition:box-shadow var(--transition);
+          background:var(--surface); border:1.5px solid var(--border);
+          border-radius:20px; overflow:hidden; transition:box-shadow var(--transition);
         }
         .pln-dia:hover { box-shadow:var(--shadow-md); }
-        .pln-dia.hoy {
-          border-color:var(--brand);
-          box-shadow:0 0 0 4px rgba(45,106,79,0.1);
-        }
+        .pln-dia.hoy { border-color:var(--brand); box-shadow:0 0 0 4px rgba(45,106,79,0.1); }
 
-        /* Cabecera de la tarjeta */
         .pln-dia-head {
-          padding:16px 18px 14px;
-          display:flex; align-items:center; justify-content:space-between;
-          border-bottom:1.5px solid var(--border);
-          background:var(--surface-2);
+          padding:16px 18px 14px; display:flex; align-items:center; justify-content:space-between;
+          border-bottom:1.5px solid var(--border); background:var(--surface-2);
         }
         .pln-dia.hoy .pln-dia-head { background:var(--brand-pale); }
         .pln-dia-left { display:flex; flex-direction:column; gap:1px; }
@@ -248,16 +247,12 @@ export default function PlanningPage() {
         }
         .pln-dia.hoy .pln-dia-num { background:var(--brand); color:white; border-color:var(--brand); }
 
-        /* Slots */
         .pln-dia-body { padding:12px; display:flex; flex-direction:column; gap:8px; }
 
-        /* Slot vacío */
         .pln-slot-vacio {
           display:flex; align-items:center; gap:12px;
-          padding:14px 16px; border-radius:14px;
-          border:1.5px dashed var(--border-strong);
-          cursor:pointer; transition:all var(--transition);
-          background:transparent;
+          padding:14px 16px; border-radius:14px; border:1.5px dashed var(--border-strong);
+          cursor:pointer; transition:all var(--transition); background:transparent;
         }
         .pln-slot-vacio:hover { border-color:var(--brand); background:var(--brand-pale); border-style:solid; }
         .pln-sv-emoji { font-size:20px; flex-shrink:0; }
@@ -267,14 +262,11 @@ export default function PlanningPage() {
         .pln-sv-add { font-size:12px; color:var(--text-3); }
         .pln-slot-vacio:hover .pln-sv-add { color:var(--brand-light); }
         .pln-sv-icon {
-          width:32px; height:32px; border-radius:9px;
-          background:var(--surface-2); border:1.5px solid var(--border);
-          display:flex; align-items:center; justify-content:center;
-          color:var(--text-3); flex-shrink:0; transition:all var(--transition);
+          width:32px; height:32px; border-radius:9px; background:var(--surface-2); border:1.5px solid var(--border);
+          display:flex; align-items:center; justify-content:center; color:var(--text-3); flex-shrink:0; transition:all var(--transition);
         }
         .pln-slot-vacio:hover .pln-sv-icon { background:var(--brand); border-color:var(--brand); color:white; }
 
-        /* Slot lleno */
         .pln-slot-lleno { border-radius:14px; border:1.5px solid; overflow:hidden; }
         .pln-sl-head { display:flex; align-items:flex-start; gap:10px; padding:14px 14px 8px; }
         .pln-sl-emoji { font-size:20px; flex-shrink:0; }
@@ -287,37 +279,31 @@ export default function PlanningPage() {
         .pln-sl-del {
           width:28px; height:28px; flex-shrink:0; border-radius:8px;
           border:none; background:rgba(255,255,255,0.5); cursor:pointer;
-          display:flex; align-items:center; justify-content:center;
-          transition:all var(--transition);
+          display:flex; align-items:center; justify-content:center; transition:all var(--transition);
         }
         .pln-sl-del:hover { background:white; color:#DC2626 !important; }
 
-        /* Footer slot lleno */
         .pln-sl-foot {
           display:flex; align-items:center; padding:4px 14px 12px; gap:8px;
           border-top:1px solid rgba(0,0,0,0.06); margin-top:4px;
         }
         .pln-sl-ver {
-          display:flex; align-items:center; gap:5px;
-          padding:7px 12px; border-radius:8px;
+          display:flex; align-items:center; gap:5px; padding:7px 12px; border-radius:8px;
           border:1.5px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.6);
           font-family:var(--font-body); font-size:12px; font-weight:700;
           cursor:pointer; transition:all var(--transition);
         }
         .pln-sl-ver:hover { background:white; }
 
-        /* Control comensales */
         .pln-com { display:flex; align-items:center; gap:6px; margin-left:auto; }
         .pln-com-btn {
-          width:30px; height:30px; border-radius:8px;
-          border:1.5px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.6);
-          cursor:pointer; display:flex; align-items:center; justify-content:center;
-          transition:all var(--transition);
+          width:30px; height:30px; border-radius:8px; border:1.5px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.6);
+          cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all var(--transition);
         }
         .pln-com-btn:hover { background:white; }
         .pln-com-val { font-size:14px; font-weight:700; min-width:28px; text-align:center; display:flex; align-items:center; justify-content:center; gap:3px; }
 
-        /* ── Modal ── */
+        /* ── Modales ── */
         .pln-ov {
           position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300;
           display:flex; align-items:flex-end; justify-content:center;
@@ -325,32 +311,26 @@ export default function PlanningPage() {
         @media(min-width:600px) { .pln-ov { align-items:center; padding:24px; } }
         .pln-modal {
           background:var(--surface); border-radius:22px 22px 0 0;
-          width:100%; max-width:500px; max-height:88dvh;
-          display:flex; flex-direction:column;
+          width:100%; max-width:500px; max-height:88dvh; display:flex; flex-direction:column;
           box-shadow:0 -8px 50px rgba(0,0,0,0.2);
         }
         @media(min-width:600px) { .pln-modal { border-radius:20px; max-height:74dvh; } }
         .pln-modal-top { padding:20px 20px 0; display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0; }
         .pln-modal-chip {
-          display:inline-flex; align-items:center; gap:7px;
-          padding:6px 14px; border-radius:100px;
+          display:inline-flex; align-items:center; gap:7px; padding:6px 14px; border-radius:100px;
           font-size:13px; font-weight:700; margin-bottom:6px; border:1.5px solid;
         }
         .pln-modal-titulo { font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text); }
         .pln-modal-sub    { font-size:14px; color:var(--text-3); margin-top:3px; }
         .pln-modal-cls {
-          width:34px; height:34px; border-radius:10px; border:none;
-          background:var(--surface-2); display:flex; align-items:center;
-          justify-content:center; cursor:pointer; color:var(--text-2);
-          flex-shrink:0; margin-left:12px; transition:background var(--transition);
+          width:34px; height:34px; border-radius:10px; border:none; background:var(--surface-2); display:flex; align-items:center;
+          justify-content:center; cursor:pointer; color:var(--text-2); flex-shrink:0; margin-left:12px; transition:background var(--transition);
         }
         .pln-modal-cls:hover { background:var(--border); }
         .pln-modal-busq { padding:16px 18px 12px; flex-shrink:0; position:relative; }
         .pln-modal-busq input {
-          width:100%; padding:11px 16px 11px 38px;
-          border:1.5px solid var(--border); border-radius:12px;
-          font-family:var(--font-body); font-size:14px; color:var(--text);
-          background:var(--surface-2); outline:none; -webkit-appearance:none;
+          width:100%; padding:11px 16px 11px 38px; border:1.5px solid var(--border); border-radius:12px;
+          font-family:var(--font-body); font-size:14px; color:var(--text); background:var(--surface-2); outline:none; -webkit-appearance:none;
           transition:all var(--transition);
         }
         .pln-modal-busq input:focus { border-color:var(--brand); background:var(--surface); box-shadow:0 0 0 3px rgba(45,106,79,0.1); }
@@ -358,13 +338,11 @@ export default function PlanningPage() {
         .pln-modal-busq-ico { position:absolute; left:30px; top:50%; transform:translateY(-50%); color:var(--text-3); pointer-events:none; }
         .pln-modal-list { overflow-y:auto; flex:1; border-top:1px solid var(--border); padding:6px; }
         .pln-modal-row {
-          display:flex; align-items:center; gap:14px; padding:10px 12px;
-          border-radius:12px; cursor:pointer; transition:background var(--transition);
+          display:flex; align-items:center; gap:14px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:background var(--transition);
         }
         .pln-modal-row:hover { background:var(--surface-2); }
         .pln-modal-ico {
-          width:44px; height:44px; border-radius:13px;
-          display:flex; align-items:center; justify-content:center;
+          width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center;
           font-size:22px; flex-shrink:0; border:1.5px solid;
         }
         .pln-modal-tit { font-size:15px; font-weight:600; color:var(--text); }
@@ -376,10 +354,8 @@ export default function PlanningPage() {
         }
         
         @media print {
-          /* Ocultamos la app normal para que solo salga el folio */
-          .no-print, .sidebar, .mobile-nav { display: none !important; }
+          .no-print, .sidebar, .bottom-nav, .mobile-nav, nav, footer { display: none !important; }
           
-          /* Reseteamos colores para no gastar tinta inútil */
           body, html, #root { 
             background: white !important; padding: 0 !important; margin: 0 !important; 
             color: #1A2E22 !important; 
@@ -390,7 +366,6 @@ export default function PlanningPage() {
             font-family: 'DM Sans', sans-serif;
           }
 
-          /* Cabecera del Documento */
           .pr-header { 
             display: flex; justify-content: space-between; align-items: flex-end; 
             border-bottom: 2px solid #2D6A4F; padding-bottom: 15px; margin-bottom: 25px; 
@@ -401,9 +376,9 @@ export default function PlanningPage() {
           .pr-nutri { text-align: right; font-size: 13px; color: #5A7366; }
           .pr-nutri strong { color: #1A2E22; display: block; font-size: 16px; margin-top: 4px;}
 
-          .pr-titulo-sem { text-align: center; font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 20px; color: #1A2E22; }
+          .pr-titulo-sem { text-align: center; font-family: 'Fraunces', serif; font-size: 22px; margin-bottom: 5px; color: #1A2E22; }
+          .pr-sub-sem { text-align: center; font-size: 14px; color: #5A7366; margin-bottom: 20px; }
 
-          /* Tabla del menú */
           .pr-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; page-break-inside: avoid; }
           .pr-table th, .pr-table td { border: 1px solid #E2EBE4; padding: 12px; text-align: left; font-size: 12px; }
           .pr-table th { background: #F8FAF8 !important; font-weight: 700; color: #2D6A4F; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -411,14 +386,12 @@ export default function PlanningPage() {
           .pr-dia-celda { font-weight: bold; background: #F8FAF8 !important; width: 120px; }
           .pr-receta-txt { font-weight: 600; color: #1A2E22; display: block; }
           
-          /* Separador de recetas */
           .pr-seccion-titulo { 
             font-family: 'Fraunces', serif; font-size: 24px; color: #2D6A4F; 
             border-bottom: 1px solid #E2EBE4; padding-bottom: 10px; margin-bottom: 20px; 
             page-break-before: always; 
           }
 
-          /* Tarjetas de recetas */
           .pr-receta { 
             page-break-inside: avoid; border: 1px solid #E2EBE4; border-radius: 12px; 
             padding: 24px; margin-bottom: 24px; background: #F8FAF8 !important; 
@@ -450,8 +423,8 @@ export default function PlanningPage() {
           
           <span className="pln-titulo">{tituloSem}</span>
           
-          {/* Botón de Imprimir PDF */}
-          <button className="pln-print-btn" onClick={() => window.print()}>
+          {/* Botón de Imprimir modificado para abrir el Modal primero */}
+          <button className="pln-print-btn" onClick={() => setShowPrintModal(true)}>
             <Printer size={16} /> Imprimir / PDF
           </button>
         </div>
@@ -521,7 +494,7 @@ export default function PlanningPage() {
           })}
         </div>
 
-        {/* Modal */}
+        {/* Modal Selección Receta */}
         {slot && slotTipo && (
           <div className="pln-ov" onClick={() => setSlot(null)}>
             <div className="pln-modal" onClick={e => e.stopPropagation()}>
@@ -565,6 +538,48 @@ export default function PlanningPage() {
             </div>
           </div>
         )}
+
+        {/* Modal Imprimir (Ajuste de Comensales) */}
+        {showPrintModal && (
+          <div className="pln-ov" onClick={() => setShowPrintModal(false)}>
+            <div className="pln-modal" style={{ maxWidth: 420, height: 'auto', paddingBottom: 24 }} onClick={e => e.stopPropagation()}>
+              <div className="pln-modal-top">
+                <div>
+                  <div className="pln-modal-titulo">Imprimir Menú Semanal</div>
+                  <div className="pln-modal-sub">Ajusta las cantidades del PDF</div>
+                </div>
+                <button className="pln-modal-cls" onClick={() => setShowPrintModal(false)}><X size={17} /></button>
+              </div>
+              <div style={{ padding: '24px 20px 0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>¿Para cuántas personas es la dieta?</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <button className="pln-btn" style={{ width: 44, height: 44 }} disabled={printComensales <= 1} onClick={() => setPrintComensales(c => c - 1)}>
+                      <Minus size={18} />
+                    </button>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--brand)', minWidth: 40, textAlign: 'center' }}>
+                      {printComensales}
+                    </span>
+                    <button className="pln-btn" style={{ width: 44, height: 44 }} onClick={() => setPrintComensales(c => c + 1)}>
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4, lineHeight: 1.4 }}>
+                    Las cantidades de todas las recetas impresas se calcularán automáticamente basándose en esta cifra.
+                  </p>
+                </div>
+                
+                <button 
+                  className="pln-print-btn" 
+                  style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: 15 }} 
+                  onClick={handleImprimir}
+                >
+                  <Printer size={18} /> Generar PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── DISEÑO INVISIBLE PARA IMPRESIÓN (Folio PDF) ── */}
@@ -583,6 +598,7 @@ export default function PlanningPage() {
         </div>
 
         <h2 className="pr-titulo-sem">Menú Semanal: {tituloSem}</h2>
+        <p className="pr-sub-sem">Pauta calculada para <strong>{printComensales} {printComensales === 1 ? 'persona' : 'personas'}</strong></p>
 
         {/* Tabla del menú semanal */}
         <table className="pr-table">
@@ -631,17 +647,26 @@ export default function PlanningPage() {
                 </div>
 
                 <div className="pr-grid">
-                  {/* Ingredientes */}
+                  {/* Ingredientes recalculados matemáticamente */}
                   <div>
                     <h4>Ingredientes</h4>
                     <ul className="pr-ing-list">
                       {receta.receta_ingredientes?.length > 0 
-                        ? receta.receta_ingredientes.map((ing, idx) => (
-                            <li key={idx}>
-                              <strong>{ing.cantidad} {ing.unidad}</strong> de {ing.ingredientes?.nombre}
-                              {ing.notas && <span style={{color:'#5A7366'}}> ({ing.notas})</span>}
-                            </li>
-                          ))
+                        ? receta.receta_ingredientes.map((ing, idx) => {
+                            // La magia matemática: (Cantidad / Comensales Base) * Comensales a Imprimir
+                            const comBase = receta.comensales_base || 2; 
+                            let cantidadAjustada = (ing.cantidad / comBase) * printComensales;
+                            
+                            // Redondeamos para no dejar decimales infinitos feos (ej: 33.33333333333)
+                            cantidadAjustada = Math.round(cantidadAjustada * 100) / 100;
+
+                            return (
+                              <li key={idx}>
+                                <strong>{cantidadAjustada} {ing.unidad}</strong> de {ing.ingredientes?.nombre}
+                                {ing.notas && <span style={{color:'#5A7366'}}> ({ing.notas})</span>}
+                              </li>
+                            )
+                          })
                         : <li>Sin ingredientes especificados.</li>
                       }
                     </ul>
