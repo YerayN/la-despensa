@@ -317,29 +317,38 @@ export default function Layout() {
         .btn-lg { padding: 13px 24px; font-size: 15px; }
         .btn-full { width: 100%; }
 
-        /* 🟢 NUEVO: Reglas de impresión globales corregidas 🟢 */
+        /* 🟢 ESTO ES LO QUE HABÍA BORRADO SIN QUERER 🟢 */
+        .input-field { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 15px; color: var(--text); background: var(--surface); outline: none; transition: border-color var(--transition), box-shadow var(--transition); -webkit-appearance: none; }
+        .input-field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(45,106,79,0.1); }
+        .input-field::placeholder { color: var(--text-3); }
+        .divider { height: 1px; background: var(--border); border: none; margin: 0; }
+        .skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        /* El diseño de las pantallas vacías */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 24px; text-align: center; color: var(--text-3); }
+        .empty-state-icon { font-size: 40px; opacity: 0.6; margin-bottom: 4px; }
+        .empty-state h3 { font-family: var(--font-display); font-size: 18px; color: var(--text-2); font-weight: 600; }
+        .empty-state p { font-size: 14px; line-height: 1.5; max-width: 280px; }
+
+        /* Títulos de las páginas */
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; }
+        .page-subtitle { font-size: 14px; color: var(--text-3); margin-top: 4px; }
+        @media (min-width: 768px) { .page-title { font-size: 30px; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+        /* 🟢 Reglas de impresión globales (las buenas) 🟢 */
         @media print {
-          /* Escondemos los menús siempre que se imprima algo */
           .sidebar, .bottom-nav { display: none !important; }
-          
-          /* Magia para que Chrome no corte la página a la mitad permitiendo múltiples folios */
           html, body, #root, .app-shell, .main-content, .page-wrapper {
-            height: auto !important;
-            min-height: auto !important;
-            overflow: visible !important;
-            overflow-x: visible !important;
-            display: block !important;
+            height: auto !important; min-height: auto !important; overflow: visible !important; overflow-x: visible !important; display: block !important;
           }
-          
-          /* Le quitamos los márgenes al contenido principal para aprovechar el papel */
-          .main-content {
-            margin-left: 0 !important;
-            padding-bottom: 0 !important;
-          }
-          .page-wrapper {
-            padding: 0 !important;
-            max-width: 100% !important;
-          }
+          .main-content { margin-left: 0 !important; padding-bottom: 0 !important; }
+          .page-wrapper { padding: 0 !important; max-width: 100% !important; }
         }
       `}</style>
 
