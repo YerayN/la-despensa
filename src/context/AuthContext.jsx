@@ -5,11 +5,10 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null)
-  const [perfil,  setPerfil]  = useState(undefined)  // undefined = todavía cargando
+  const [perfil,  setPerfil]  = useState(undefined)  // undefined = todavía resolviendo
   const [hogar,   setHogar]   = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Token anti-race: evita que una carga antigua sobreescriba una nueva
   const perfilTokenRef = useRef(null)
 
   const loadPerfil = useCallback(async (userId) => {
@@ -23,13 +22,8 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .single()
 
-      // Si ya hay una carga más reciente en curso, ignorar este resultado
       if (perfilTokenRef.current !== token) return null
-
-      if (error || !data) {
-        setPerfil(null)
-        return null
-      }
+      if (error || !data) { setPerfil(null); return null }
 
       setPerfil(data)
       if (data.hogares) setHogar(data.hogares)
@@ -51,7 +45,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    // ── Carga inicial: sesión persistida en el navegador ──────────
+    // ── Inicialización: sesión ya persistida en el navegador ──────
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -64,7 +58,7 @@ export function AuthProvider({ children }) {
           setPerfil(null)
         }
       } catch (e) {
-        console.error('Error inicializando auth:', e)
+        console.error('Auth init error:', e)
         if (mounted) setPerfil(null)
       } finally {
         if (mounted) setLoading(false)
@@ -73,25 +67,37 @@ export function AuthProvider({ children }) {
 
     init()
 
-    // ── Listener de eventos de sesión ─────────────────────────────
+    // ── Listener de cambios de sesión ─────────────────────────────
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Poner loading=true ANTES de cargar el perfil para que AppRoute
-          // no evalúe con user=ok + perfil=undefined → /setup-hogar por error
-          setLoading(true)
-          setUser(session.user)
-          await loadPerfil(session.user.id)
-          if (mounted) setLoading(false)
+          // Distinguir login real de reactivación tras inactividad:
+          // Si ya tenemos un perfil cargado para este mismo usuario,
+          // NO poner loading=true — solo actualizar el user silenciosamente.
+          // Si es un usuario diferente o no hay perfil, sí cargar.
+          const yaTenemosPerfilDeEsteUsuario =
+            perfil !== undefined && perfil !== null && perfil.id === session.user.id
+
+          if (yaTenemosPerfilDeEsteUsuario) {
+            // Reactivación tras inactividad — refrescar datos sin bloquear UI
+            setUser(session.user)
+            loadPerfil(session.user.id)  // sin await: actualización silenciosa
+          } else {
+            // Login real o cambio de usuario — bloquear UI mientras cargamos
+            setLoading(true)
+            setUser(session.user)
+            await loadPerfil(session.user.id)
+            if (mounted) setLoading(false)
+          }
 
         } else if (event === 'SIGNED_OUT') {
           clearAuth()
           setLoading(false)
 
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Refresco silencioso — no tocar perfil ni loading
+          // Refresco silencioso de token — solo actualizar user, nunca tocar loading
           setUser(session.user)
 
         } else if (event === 'USER_UPDATED' && session?.user) {
@@ -104,9 +110,8 @@ export function AuthProvider({ children }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [loadPerfil, clearAuth])
+  }, [loadPerfil, clearAuth, perfil])
 
-  // signOut: limpiar estado local primero para respuesta inmediata en UI
   const signOut = useCallback(async () => {
     clearAuth()
     setLoading(false)
