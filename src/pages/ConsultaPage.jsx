@@ -12,7 +12,6 @@ export default function ConsultaPage() {
 
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
-  const [creando, setCreando] = useState(false)
 
   // Traemos la lista de MIS pacientes
   const { data: pacientes = [], isLoading } = useQuery({
@@ -41,7 +40,6 @@ export default function ConsultaPage() {
       qc.invalidateQueries(['pacientes'])
       setNombre('')
       setEmail('')
-      setCreando(false)
     }
   })
 
@@ -53,6 +51,7 @@ export default function ConsultaPage() {
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+        {/* Card para añadir pacientes */}
         <div className="card" style={{ flex: '1 1 300px', padding: 24 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--brand-dark)', marginBottom: 16 }}>
             Añadir nuevo paciente
@@ -82,6 +81,7 @@ export default function ConsultaPage() {
           </div>
         </div>
 
+        {/* Card con la lista de pacientes */}
         <div className="card" style={{ flex: '2 1 400px', padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <Users size={20} color="var(--brand)" />
@@ -91,28 +91,41 @@ export default function ConsultaPage() {
           </div>
 
           {isLoading ? (
-            <p style={{ color: 'var(--text-3)' }}>Cargando...</p>
+            <div className="empty-state">
+              <Loader size={32} className="spinner-sm" style={{ color: 'var(--brand)' }} />
+              <p>Cargando pacientes...</p>
+            </div>
           ) : pacientes.length === 0 ? (
-            <div className="empty-state" style={{ padding: '20px 0' }}>
-              <Users size={32} opacity={0.5} />
-              <p>Aún no tienes pacientes dados de alta.</p>
+            <div className="empty-state">
+              <div className="empty-state-icon">👥</div>
+              <h3>Sin pacientes todavía</h3>
+              <p>Añade a tu primer cliente para empezar a planificar su dieta.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {pacientes.map(p => (
                 <div 
                   key={p.id} 
+                  className="receta-mini" // Reutilizamos tu estilo de tarjetas pequeñas
                   style={{ 
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                    padding: '12px 16px', background: 'var(--surface-2)', 
-                    borderRadius: '12px', cursor: 'pointer', border: '1px solid var(--border)' 
+                    padding: '16px', cursor: 'pointer', width: '100%' 
                   }}
-                  // En el próximo paso haremos que este botón abra SU planning
-                  onClick={() => navigate(`/consulta/paciente${p.id}`)}
+                  // 🟢 CORREGIDO: Añadida la barra / necesaria para la ruta 🟢
+                  onClick={() => navigate(`/consulta/paciente/${p.id}`)}
                 >
-                  <div>
-                    <div style={{ fontWeight: 600, color: 'var(--text)' }}>{p.nombre}</div>
-                    {p.email && <div style={{ fontSize: 13, color: 'var(--text-3)' }}>{p.email}</div>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ 
+                      width: 40, height: 40, borderRadius: '10px', background: 'var(--brand-pale)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)',
+                      fontWeight: 'bold', fontSize: 18
+                    }}>
+                      {p.nombre.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--text)' }}>{p.nombre}</div>
+                      {p.email && <div style={{ fontSize: 13, color: 'var(--text-3)' }}>{p.email}</div>}
+                    </div>
                   </div>
                   <ArrowRight size={18} color="var(--text-3)" />
                 </div>

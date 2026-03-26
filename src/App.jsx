@@ -13,7 +13,7 @@ import ListaPage      from './pages/ListaPage'
 import ComunidadPage  from './pages/ComunidadPage'
 import AjustesPage    from './pages/AjustesPage'
 
-// 🟢 NUEVAS PÁGINAS PARA PROFESIONALES 🟢
+// 🟢 IMPORTANTE: Asegúrate de que estas importaciones están presentes
 import ConsultaPage         from './pages/ConsultaPage'
 import PlanningPacientePage from './pages/PlanningPacientePage'
 
@@ -55,7 +55,6 @@ function AppRoute({ children }) {
   return children
 }
 
-// 🟢 NUEVA BARRERA: Solo Nutricionistas 🟢
 function NutricionistaRoute({ children }) {
   const { user, perfil, loading } = useAuth()
   if (loading || perfil === undefined) return <LoadingScreen />
@@ -82,9 +81,9 @@ export default function App() {
         <Route path="comunidad"          element={<ComunidadPage />} />
         <Route path="ajustes"            element={<AjustesPage />} />
         
-        {/* 🟢 ZONA VIP NUTRICIONISTAS 🟢 */}
-        <Route path="consulta"               element={<NutricionistaRoute><ConsultaPage /></NutricionistaRoute>} />
-        <Route path="consulta/paciente/:id"  element={<NutricionistaRoute><PlanningPacientePage /></NutricionistaRoute>} />
+        {/* 🟢 ZONA CONSULTA: Rutas corregidas 🟢 */}
+        <Route path="consulta" element={<NutricionistaRoute><ConsultaPage /></NutricionistaRoute>} />
+        <Route path="consulta/paciente/:id" element={<NutricionistaRoute><PlanningPacientePage /></NutricionistaRoute>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
