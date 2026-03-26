@@ -235,7 +235,6 @@ export default function PlanningPacientePage() {
         .pln-modal-tit { font-size:15px; font-weight:600; color:var(--text); }
         .pln-modal-sub-r { font-size:13px; color:var(--text-3); margin-top:2px; }
 
-        /* ── 🟢 DISEÑO PDF PREMIUM 🟢 ── */
         @media screen { .print-only { display: none !important; } }
         @media print {
           .no-print, .sidebar, .bottom-nav, nav, footer { display: none !important; }
@@ -245,96 +244,49 @@ export default function PlanningPacientePage() {
           }
           .main-content { margin-left: 0 !important; padding-bottom: 0 !important; }
           .page-wrapper { padding: 0 !important; max-width: 100% !important; }
-          
           .print-only { display: block !important; width: 100%; font-family: 'DM Sans', sans-serif; }
-          
-          /* CABECERA GIGANTE */
-          .pr-hero-header {
-            background: #EDF3EF !important;
-            padding: 40px 50px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #C5D9CB;
-            margin-bottom: 30px;
-          }
-          
+          .pr-hero-header { background: #EDF3EF !important; padding: 40px 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #C5D9CB; margin-bottom: 30px; }
           .pr-nutri-brand { display: flex; align-items: center; gap: 25px; }
-          .pr-nutri-logo { 
-            width: 90px; height: 90px;
-            object-fit: contain; border-radius: 16px; 
-            background: white !important; padding: 5px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-          }
-          .pr-nutri-data h1 { 
-            font-family: 'Fraunces', serif; font-size: 32px; font-weight: 800;
-            color: #1B4332 !important; margin: 0 0 4px 0; letter-spacing: -0.5px;
-          }
+          .pr-nutri-logo { width: 90px; height: 90px; object-fit: contain; border-radius: 16px; background: white !important; padding: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+          .pr-nutri-data h1 { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 800; color: #1B4332 !important; margin: 0 0 4px 0; letter-spacing: -0.5px; }
           .pr-nutri-data p { font-size: 16px; color: #4A6358; margin: 0; font-weight: 500; }
-          
           .pr-app-brand { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;}
           .pr-app-logo { width: 32px; height: 32px; object-fit: contain; opacity: 0.6; filter: grayscale(1); }
           .pr-app-web { font-size: 12px; color: #8AA494; font-weight: 500; letter-spacing: 0.02em; }
-
-          .pr-paciente-card {
-            margin: 0 50px 35px; padding: 20px 25px;
-            background: white !important; border: 1px solid #E2EBE4; border-radius: 16px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 8px rgba(45,106,79,0.04);
-          }
+          .pr-paciente-card { margin: 0 50px 35px; padding: 20px 25px; background: white !important; border: 1px solid #E2EBE4; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(45,106,79,0.04); }
           .pr-pac-name { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #5A7366; }
           .pr-pac-name strong { font-family: 'Fraunces', serif; font-size: 20px; color: #1A2E22 !important; }
-          .pr-racion-badge {
-            background: #D8F3DC !important; color: #1B4332 !important;
-            padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 13px;
-          }
-
+          .pr-racion-badge { background: #D8F3DC !important; color: #1B4332 !important; padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 13px; }
           .pr-titulo-sem { text-align: center; font-family: 'Fraunces', serif; font-size: 26px; margin: 0 0 25px 0; color: #1A2E22; letter-spacing: -0.3px;}
-
           .pr-table-container { margin: 0 30px 50px; }
           .pr-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #E2EBE4; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); page-break-inside: avoid; }
           .pr-table th, .pr-table td { border-bottom: 1px solid #E2EBE4; border-right: 1px solid #E2EBE4; padding: 15px; text-align: left; font-size: 13px; }
           .pr-table th:last-child, .pr-table td:last-child { border-right: none; }
           .pr-table tr:last-child td { border-bottom: none; }
-          
           .pr-table th { background: #F8FAF8 !important; font-weight: 700; color: #2D6A4F; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
           .pr-table td { vertical-align: top; line-height: 1.5; background: white !important; }
           .pr-dia-celda { font-weight: 800; background: #EDF3EF !important; width: 130px; font-size: 14px; color: #1B4332 !important;}
           .pr-receta-txt { font-weight: 600; color: #1A2E22; display: block; margin-top: 2px; }
-          
           .pr-body-content { margin: 0 50px; }
           .pr-seccion-titulo { font-family: 'Fraunces', serif; font-size: 28px; color: #1B4332; margin: 40px 0 30px 0; page-break-before: always; border-bottom: 1px solid #E2EBE4; padding-bottom: 10px; }
-
-          .pr-receta { 
-            page-break-inside: avoid; border: 1px solid #E2EBE4; border-radius: 16px; 
-            padding: 30px; margin-bottom: 30px; background: white !important; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-          }
+          .pr-receta { page-break-inside: avoid; border: 1px solid #E2EBE4; border-radius: 16px; padding: 30px; margin-bottom: 30px; background: white !important; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
           .pr-receta h3 { font-family: 'Fraunces', serif; font-size: 22px; margin: 0 0 15px 0; color: #1B4332; letter-spacing: -0.3px;}
-          
           .pr-meta-group { display: flex; gap: 25px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #E2EBE4; }
           .pr-meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4A6358; font-weight: 600; }
-
           .pr-grid { display: grid; grid-template-columns: 1fr 1.8fr; gap: 35px; }
           .pr-receta h4 { font-size: 14px; text-transform: uppercase; color: #1B4332; margin: 0 0 15px 0; letter-spacing: 0.08em; font-weight: 800; }
-          
           .pr-ing-list { list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.7; }
           .pr-ing-list li { border-bottom: 1px solid #F0F4F1; padding: 8px 0; color: #1A2E22; }
-          .pr-ing-list li strong { color: #1B4332; font-weight: 700; }
-          
           .pr-pasos-list { padding-left: 20px; margin: 0; font-size: 13px; line-height: 1.8; color: #333; }
           .pr-pasos-list li { margin-bottom: 12px; text-align: justify; padding-left: 5px;}
-
-          /* LISTA COMPRA PDF */
           .pr-lista-compra { page-break-before: always; margin: 0 50px; }
-          .pr-lista-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 40px;
-            background: white !important; padding: 30px; border-radius: 16px; border: 1px solid #E2EBE4;
-          }
+          .pr-lista-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 40px; background: white !important; padding: 30px; border-radius: 16px; border: 1px solid #E2EBE4; }
           .pr-lista-item { display: flex; align-items: center; gap: 10px; font-size: 13px; border-bottom: 1px dashed #E2EBE4; padding-bottom: 8px; }
           .pr-check { width: 14px; height: 14px; border: 1px solid #2D6A4F; border-radius: 3px; flex-shrink: 0; }
         }
       `}</style>
 
-      {/* ── INTERFAZ NORMAL ── */}
+      {/* ── INTERFAZ WEB ── */}
       <div className="no-print">
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: 20 }}>
           <button className="pln-btn" style={{ width: 36, height: 36 }} onClick={() => navigate('/consulta')}><ArrowLeft size={18} /></button>
@@ -353,14 +305,13 @@ export default function PlanningPacientePage() {
           <button className="pln-btn" onClick={() => setSemana(d => addDays(d, -7))}><ChevronLeft size={20} /></button>
           <button className="pln-hoy" onClick={() => setSemana(getLunes(new Date()))}>Esta semana</button>
           <button className="pln-btn" onClick={() => setSemana(d => addDays(d, 7))}><ChevronRight size={20} /></button>
-          
           <span className="pln-titulo">{tituloSem}</span>
-          
           <button className="pln-print-btn" onClick={() => setShowPrintModal(true)}>
             <Printer size={16} /> Generar PDF Profesional
           </button>
         </div>
 
+        {/* ── GRID DE DÍAS (EL CALENDARIO) ── */}
         <div className="pln-grid">
           {dias.map((d, i) => {
             const esHoy = toStr(d) === hoyStr
@@ -468,17 +419,11 @@ export default function PlanningPacientePage() {
         )}
       </div>
 
-      {/* ── 🟢 DISEÑO PDF PREMIUM 🟢 ── */}
+      {/* ── 🟢 EL PDF PREMIUM 🟢 ── */}
       <div className="print-only">
         <div className="pr-hero-header">
           <div className="pr-nutri-brand">
-            {perfil?.logo_url ? (
-                <img src={perfil.logo_url} alt="Logo Profesional" className="pr-nutri-logo" />
-            ) : (
-                <div className="pr-nutri-logo" style={{display:'flex', alignItems:'center', justifyContent:'center', color:'var(--brand)', background:'white'}}>
-                    <Stethoscope size={50} strokeWidth={1.5}/>
-                </div>
-            )}
+            {perfil?.logo_url ? <img src={perfil.logo_url} alt="Logo Profesional" className="pr-nutri-logo" /> : <div className="pr-nutri-logo" style={{display:'flex', alignItems:'center', justifyContent:'center', color:'var(--brand)', background:'white'}}><Stethoscope size={50} strokeWidth={1.5}/></div>}
             <div className="pr-nutri-data">
               <h1>{perfil?.nombre || user?.user_metadata?.nombre}</h1>
               <p>Nutrición y Dietética Profesional</p>
@@ -491,25 +436,15 @@ export default function PlanningPacientePage() {
         </div>
 
         <div className="pr-paciente-card">
-            <div className="pr-pac-name">
-                <User size={18}/>
-                <div>Plan nutricional para: <strong>{paciente?.nombre}</strong></div>
-            </div>
-            <div className="pr-racion-badge">
-                {printComensales} {printComensales === 1 ? 'ración' : 'raciones'} por comida
-            </div>
+            <div className="pr-pac-name"><User size={18}/>Plan para: <strong>{paciente?.nombre}</strong></div>
+            <div className="pr-racion-badge">{printComensales} {printComensales === 1 ? 'ración' : 'raciones'} por comida</div>
         </div>
 
         <h2 className="pr-titulo-sem">Menú Semanal: {tituloSem}</h2>
 
         <div className="pr-table-container">
             <table className="pr-table">
-            <thead>
-                <tr>
-                <th className="pr-dia-celda">Día</th>
-                {TIPOS.map(t => <th key={t.key}>{t.label}</th>)}
-                </tr>
-            </thead>
+            <thead><tr><th className="pr-dia-celda">Día</th>{TIPOS.map(t => <th key={t.key}>{t.label}</th>)}</tr></thead>
             <tbody>
                 {dias.map((d, i) => (
                 <tr key={i}>
@@ -531,38 +466,23 @@ export default function PlanningPacientePage() {
               <div key={receta.id} className="pr-receta">
                 <h3>{receta.titulo}</h3>
                 <div className="pr-meta-group">
-                  {receta.tiempo_preparacion && (
-                    <div className="pr-meta-item"><Clock3 size={15}/> Preparación: {receta.tiempo_preparacion} min</div>
-                  )}
-                  {receta.tiempo_coccion && (
-                    <div className="pr-meta-item"><Zap size={15}/> Cocción: {receta.tiempo_coccion} min</div>
-                  )}
+                  {receta.tiempo_preparacion && <div className="pr-meta-item"><Clock3 size={15}/> Preparación: {receta.tiempo_preparacion} min</div>}
+                  {receta.tiempo_coccion && <div className="pr-meta-item"><Zap size={15}/> Cocción: {receta.tiempo_coccion} min</div>}
                 </div>
-
                 <div className="pr-grid">
                   <div>
-                    <h4>Ingredientes necesarios</h4>
+                    <h4>Ingredientes</h4>
                     <ul className="pr-ing-list">
-                      {receta.receta_ingredientes?.length > 0 
-                        ? receta.receta_ingredientes.map((ing, idx) => {
-                            const comBase = receta.comensales_base || 2; 
-                            let cantidadAjustada = Math.round(((ing.cantidad / comBase) * printComensales) * 100) / 100;
-                            return (
-                              <li key={idx}><strong>{cantidadAjustada} {ing.unidad}</strong> de {ing.ingredientes?.nombre}{ing.notas && <span style={{color:'#6A8378'}}> ({ing.notas})</span>}</li>
-                            )
-                          })
-                        : <li>Consultar ingredientes con el profesional.</li>
-                      }
+                      {receta.receta_ingredientes?.map((ing, idx) => {
+                          const comBase = receta.comensales_base || 2; 
+                          let cantAjust = Math.round(((ing.cantidad / comBase) * printComensales) * 100) / 100;
+                          return <li key={idx}><strong>{cantAjust} {ing.unidad}</strong> de {ing.ingredientes?.nombre}{ing.notas && <span style={{color:'#6A8378'}}> ({ing.notas})</span>}</li>
+                      })}
                     </ul>
                   </div>
                   <div>
-                    <h4>Pasos para la preparación</h4>
-                    <ol className="pr-pasos-list">
-                      {Array.isArray(receta.pasos) && receta.pasos.length > 0
-                        ? receta.pasos.map((paso, idx) => <li key={idx}>{typeof paso === 'string' ? paso : paso.texto}</li>)
-                        : <li>Consultar pasos de preparación con el profesional.</li>
-                      }
-                    </ol>
+                    <h4>Preparación</h4>
+                    <ol className="pr-pasos-list">{receta.pasos?.map((paso, idx) => <li key={idx}>{typeof paso === 'string' ? paso : paso.texto}</li>)}</ol>
                   </div>
                 </div>
               </div>
@@ -570,21 +490,15 @@ export default function PlanningPacientePage() {
           </div>
         )}
 
-        {/* LISTA COMPRA SEMANAL EN PDF */}
         {listaCompraPdf.length > 0 && (
           <div className="pr-lista-compra">
             <h2 className="pr-seccion-titulo">Lista de la Compra Semanal</h2>
             <div className="pr-lista-grid">
               {listaCompraPdf.map((item, idx) => (
-                <div key={idx} className="pr-lista-item">
-                  <div className="pr-check"></div>
-                  <span><strong>{Math.round(item.cantidad * 100) / 100} {item.unidad}</strong> de {item.nombre}</span>
-                </div>
+                <div key={idx} className="pr-lista-item"><div className="pr-check"></div><span><strong>{Math.round(item.cantidad * 100) / 100} {item.unidad}</strong> de {item.nombre}</span></div>
               ))}
             </div>
-            <div style={{ marginTop: 60, textAlign: 'center', borderTop: '1px solid #E2EBE4', paddingTop: 20 }}>
-                <p style={{ fontFamily: 'Fraunces', fontSize: 18, color: '#2D6A4F' }}>¡Mucho ánimo con tu nueva semana!</p>
-            </div>
+            <div style={{ marginTop: 60, textAlign: 'center', borderTop: '1px solid #E2EBE4', paddingTop: 20 }}><p style={{ fontFamily: 'Fraunces', fontSize: 18, color: '#2D6A4F' }}>¡Mucho ánimo con tu nueva semana!</p></div>
           </div>
         )}
       </div>
