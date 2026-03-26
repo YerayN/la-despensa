@@ -86,11 +86,11 @@ export default function AjustesPage() {
         .eq('id', user.id)
       if (error) throw error
     },
-    onSuccess: async () => {
-      // Limpiar hogar del contexto inmediatamente para que AppRoute
-      // redirija a /setup-hogar sin esperar a loadPerfil
+    onSuccess: () => {
+      // Actualizar el contexto inmediatamente sin pasar por loadPerfil
+      // para que AppRoute redirija a /setup-hogar limpiamente
+      setPerfil(p => p ? { ...p, hogar_id: null, hogares: null } : null)
       setHogar(null)
-      setPerfil(p => p ? { ...p, hogar_id: null, hogares: null } : p)
     },
   })
 

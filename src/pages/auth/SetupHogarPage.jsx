@@ -6,91 +6,79 @@ import { Minus, Plus, ArrowRight, ChefHat } from 'lucide-react'
 
 export default function SetupHogarPage() {
   const navigate = useNavigate()
-  const { user, perfil, setHogar, loadPerfil } = useAuth()
+  const { user, setHogar, loadPerfil } = useAuth()
 
-  const [modo,       setModo]       = useState(null)   // null | 'crear' | 'unirse'
-  const [loading,    setLoading]    = useState(false)
-  const [iniciando,  setIniciando]  = useState(true)   // gestiona creación de perfil si falta
-  const [error,      setError]      = useState('')
+  const [modo,      setModo]      = useState(null)  // null | 'crear' | 'unirse'
+  const [loading,   setLoading]   = useState(false)
+  const [iniciando, setIniciando] = useState(true)
+  const [error,     setError]     = useState('')
+  const [nombre,    setNombre]    = useState('')
+  const [comensales,setComensales]= useState(2)
+  const [codigo,    setCodigo]    = useState('')
+  const [userName,  setUserName]  = useState('')
 
-  // Crear hogar
-  const [nombre,     setNombre]     = useState('')
-  const [comensales, setComensales] = useState(2)
-
-  // Unirse con código
-  const [codigo, setCodigo] = useState('')
-
-  // ── Si ya tiene hogar, salir inmediatamente ───────────────
-  useEffect(() => {
-    if (perfil?.hogar_id) {
-      navigate('/', { replace: true })
-    }
-  }, [perfil, navigate])
-
-  // ── Asegurar que el perfil existe en la BD ────────────────
-  // Esto solo corre una vez: cuando el user está disponible pero
-  // perfil aún no existe (usuario recién confirmado por email).
+  // Inicialización: consultar BD directamente para evitar estados intermedios del contexto
   useEffect(() => {
     if (!user) return
+    let cancelled = false
 
     const init = async () => {
       setIniciando(true)
 
-      // Intentar leer el perfil directamente de Supabase (no confiar en el contexto
-      // porque puede estar en undefined durante la transición)
-      const { data: perfilExistente } = await supabase
+      // Nombre para el saludo
+      setUserName(user.user_metadata?.nombre?.split(' ')[0] || '')
+
+      // Leer perfil directamente de Supabase
+      const { data: p } = await supabase
         .from('perfiles')
         .select('id, hogar_id')
         .eq('id', user.id)
         .single()
 
-      if (perfilExistente?.hogar_id) {
-        // Ya tiene hogar — recargar contexto y salir
+      if (cancelled) return
+
+      // Ya tiene hogar → salir
+      if (p?.hogar_id) {
         await loadPerfil(user.id)
         navigate('/', { replace: true })
         return
       }
 
-      if (!perfilExistente) {
-        // Perfil no existe aún (primer acceso tras confirmar email)
-        const nombre = user.user_metadata?.nombre || 'Usuario'
+      // No existe perfil → crearlo
+      if (!p) {
         await supabase.from('perfiles').upsert({
-          id:       user.id,
-          nombre,
-          email:    user.email,
+          id: user.id,
+          nombre: user.user_metadata?.nombre || 'Usuario',
+          email:  user.email,
           hogar_id: null,
         }, { onConflict: 'id' })
         await loadPerfil(user.id)
       }
 
-      // Código de invitación guardado en metadata durante el registro
+      // Código de invitación en metadata (puesto durante el registro)
       const codigoMeta = user.user_metadata?.codigo_hogar?.trim().toUpperCase()
       if (codigoMeta) {
         const { data: hogarEncontrado } = await supabase
-          .from('hogares')
-          .select('*')
-          .eq('codigo_union', codigoMeta)
-          .single()
+          .from('hogares').select('*').eq('codigo_union', codigoMeta).single()
 
         if (hogarEncontrado) {
           await supabase.from('perfiles').update({ hogar_id: hogarEncontrado.id }).eq('id', user.id)
           await supabase.auth.updateUser({ data: { codigo_hogar: null } })
           await loadPerfil(user.id)
-          navigate('/', { replace: true })
+          if (!cancelled) navigate('/', { replace: true })
           return
         }
-        // Código no encontrado — pre-rellenar campo
-        setCodigo(codigoMeta)
-        setModo('unirse')
+        // Código inválido → pre-rellenar y mostrar formulario
+        if (!cancelled) { setCodigo(codigoMeta); setModo('unirse') }
       }
 
-      setIniciando(false)
+      if (!cancelled) setIniciando(false)
     }
 
     init()
+    return () => { cancelled = true }
   }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Crear hogar ───────────────────────────────────────────
   const handleCrear = async (e) => {
     e.preventDefault()
     setError('')
@@ -114,7 +102,6 @@ export default function SetupHogarPage() {
     navigate('/', { replace: true })
   }
 
-  // ── Unirse con código ─────────────────────────────────────
   const handleUnirse = async (e) => {
     e.preventDefault()
     setError('')
@@ -140,19 +127,17 @@ export default function SetupHogarPage() {
     navigate('/', { replace: true })
   }
 
-  const userName = perfil?.nombre || user?.user_metadata?.nombre || ''
-
-  // Pantalla de carga mientras inicializamos
   if (iniciando) {
     return (
       <div style={{
-        minHeight:'100dvh', display:'flex', alignItems:'center', justifyContent:'center',
-        background:'#F8FAF8',
+        minHeight:'100dvh', display:'flex', alignItems:'center',
+        justifyContent:'center', background:'#F8FAF8',
       }}>
         <div style={{
           width:52, height:52, background:'linear-gradient(135deg,#2D6A4F,#40916C)',
-          borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center',
-          fontSize:26, animation:'pulse 1.5s ease-in-out infinite',
+          borderRadius:16, display:'flex', alignItems:'center',
+          justifyContent:'center', fontSize:26,
+          animation:'pulse 1.5s ease-in-out infinite',
         }}>🥘</div>
         <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}`}</style>
       </div>
@@ -199,7 +184,7 @@ export default function SetupHogarPage() {
         .field label{font-size:13px;font-weight:600;color:var(--text-2);}
         .field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;
           font-family:var(--font-body);font-size:15px;color:var(--text);outline:none;
-          transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;}
+          transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;background:white;}
         .field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(45,106,79,.1);}
         .hint{font-size:12px;color:var(--text-3);margin-top:3px;}
         .counter{display:flex;align-items:center;gap:16px;}
@@ -209,17 +194,17 @@ export default function SetupHogarPage() {
         .cnt-btn:hover:not(:disabled){border-color:var(--brand);color:var(--brand);}
         .cnt-btn:disabled{opacity:.4;cursor:not-allowed;}
         .cnt-n{font-size:22px;font-weight:600;min-width:32px;text-align:center;}
-        .alert{background:var(--error-bg);border:1px solid #F5C6C0;border-radius:10px;
+        .alert-err{background:var(--error-bg);border:1px solid #F5C6C0;border-radius:10px;
           padding:10px 14px;font-size:13px;color:var(--error);line-height:1.4;}
-        .btn{width:100%;padding:14px;
+        .btn-submit{width:100%;padding:14px;
           background:linear-gradient(135deg,var(--brand) 0%,var(--brand-light) 100%);
           color:white;border:none;border-radius:10px;font-family:var(--font-body);
           font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;
           display:flex;align-items:center;justify-content:center;gap:8px;
           box-shadow:0 2px 12px rgba(45,106,79,.25);-webkit-tap-highlight-color:transparent;}
-        .btn:hover:not(:disabled){opacity:.92;}
-        .btn:active:not(:disabled){transform:scale(.98);}
-        .btn:disabled{opacity:.6;cursor:not-allowed;}
+        .btn-submit:hover:not(:disabled){opacity:.92;}
+        .btn-submit:active:not(:disabled){transform:scale(.98);}
+        .btn-submit:disabled{opacity:.6;cursor:not-allowed;}
         .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);
           border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -234,7 +219,7 @@ export default function SetupHogarPage() {
 
         <div className="card">
           <div className="card-header">
-            <h2>¡Hola{userName ? `, ${userName.split(' ')[0]}` : ''}! 👋</h2>
+            <h2>¡Hola{userName ? `, ${userName}` : ''}! 👋</h2>
             <p>Crea tu hogar o únete al de alguien con su código de invitación.</p>
           </div>
 
@@ -268,9 +253,11 @@ export default function SetupHogarPage() {
                     onClick={() => setComensales(c=>c+1)}><Plus size={16}/></button>
                 </div>
               </div>
-              {error && <div className="alert">{error}</div>}
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? <><div className="spinner"/>Creando...</> : <>Crear hogar <ArrowRight size={16}/></>}
+              {error && <div className="alert-err">{error}</div>}
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading
+                  ? <><div className="spinner"/>Creando...</>
+                  : <>Crear hogar <ArrowRight size={16}/></>}
               </button>
             </form>
           )}
@@ -284,11 +271,13 @@ export default function SetupHogarPage() {
                   placeholder="Ej: A1B2C3D4"
                   style={{letterSpacing:'0.15em',fontWeight:600,textTransform:'uppercase'}}
                   required />
-                <p className="hint">Pídele el código al administrador del hogar. Lo encontrará en Ajustes.</p>
+                <p className="hint">Lo encontrarás en Ajustes → Invitar a alguien.</p>
               </div>
-              {error && <div className="alert">{error}</div>}
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? <><div className="spinner"/>Buscando...</> : <>Unirme al hogar <ArrowRight size={16}/></>}
+              {error && <div className="alert-err">{error}</div>}
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading
+                  ? <><div className="spinner"/>Buscando...</>
+                  : <>Unirme al hogar <ArrowRight size={16}/></>}
               </button>
             </form>
           )}
