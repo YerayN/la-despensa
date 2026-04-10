@@ -10,38 +10,52 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   const loadPerfil = useCallback(async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('perfiles')
-        .select('*, hogares(*)')
-        .eq('id', userId)
-        .single()
+    let intentos = 3; // Le damos 3 oportunidades para despertar
+    
+    while (intentos > 0) {
+      try {
+        const { data, error } = await supabase
+          .from('perfiles')
+          .select('*, hogares(*)')
+          .eq('id', userId)
+          .single()
 
-      if (error) {
-        console.error("Error al cargar perfil:", error)
-        // PGRST116 es el código exacto de Supabase para "No se encontró la fila"
-        if (error.code === 'PGRST116') {
+        if (error) {
+          // Si el usuario realmente no existe
+          if (error.code === 'PGRST116') {
+            setPerfil(null)
+            setHogar(null)
+            return null
+          }
+          // Si es otro error (ej. base de datos dormida), forzamos a que salte al catch
+          throw error; 
+        }
+
+        if (!data) {
           setPerfil(null)
           setHogar(null)
           return null
         }
-        // Si es cualquier otro error (red, lag...), NO ponemos null. 
-        // Así evitamos que la app crea que eres un usuario nuevo y te borre cosas.
-        return null
-      }
 
-      if (!data) {
-        setPerfil(null)
-        setHogar(null)
-        return null
-      }
+        // ¡Despertó y todo fue bien!
+        setPerfil(data)
+        setHogar(data.hogares ?? null)
+        return data
 
-      setPerfil(data)
-      setHogar(data.hogares ?? null)
-      return data
-    } catch (e) {
-      console.error("Excepción en loadPerfil:", e)
-      return null
+      } catch (e) {
+        console.error(`Intento fallido. Quedan ${intentos - 1} intentos...`, e)
+        intentos--; // Restamos un intento
+        
+        if (intentos === 0) {
+          // Si después de 3 intentos no va, avisamos y salimos para que no cargue infinito
+          alert("El servidor está tardando mucho en responder. Por favor, recarga la página.");
+          setPerfil(null); 
+          return null;
+        }
+        
+        // Esperamos 2 segundos antes de volver a intentar
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
   }, [])
 

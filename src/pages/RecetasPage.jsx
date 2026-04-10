@@ -31,7 +31,7 @@ export default function RecetasPage() {
   const [busqueda,setBusqueda]= useState('')
 
   // ── Mis recetas ──────────────────────────────────────────
-  const { data: misRecetas = [], isLoading: loadingMias } = useQuery({
+  const { data: misRecetas = [], isLoading: loadingMias, isError: errorMias, refetch: refetchMias } = useQuery({
     queryKey: ['recetas-mias', hogar?.id],
     queryFn: async () => {
       const { data } = await supabase
@@ -45,7 +45,7 @@ export default function RecetasPage() {
   })
 
   // ── Recetas guardadas ────────────────────────────────────
-  const { data: guardadas = [], isLoading: loadingGuardadas } = useQuery({
+  const { data: guardadas = [], isLoading: loadingGuardadas, isError: errorGuardadas, refetch: refetchGuardadas } = useQuery({
     queryKey: ['recetas-guardadas', hogar?.id],
     queryFn: async () => {
       // Paso 1: obtener IDs guardados
@@ -65,6 +65,9 @@ export default function RecetasPage() {
     },
     enabled: !!hogar?.id,
   })
+
+  const errorFetch = tab === 'mias' ? errorMias : errorGuardadas
+  const reintentar = tab === 'mias' ? refetchMias : refetchGuardadas
 
   const lista   = tab === 'mias' ? misRecetas : guardadas
   const loading = tab === 'mias' ? loadingMias : loadingGuardadas
@@ -295,6 +298,17 @@ button {
               </div>
             </div>
           ))}
+        </div>
+      ) : errorFetch ? (
+        <div className="card" style={{ textAlign: 'center', padding: '40px 20px', marginTop: '20px' }}>
+          <div style={{ fontSize: '40px', marginBottom: '10px' }}>🥱</div>
+          <h3>La base de datos está despertando</h3>
+          <p style={{ color: 'var(--text-3)', marginBottom: '20px', fontSize: '14px' }}>
+            Como es un servidor gratuito, a veces necesita un empujoncito.
+          </p>
+          <button className="btn-primary" onClick={() => reintentar()} style={{ width: 'auto', margin: '0 auto' }}>
+            Volver a intentar
+          </button>
         </div>
       ) : filtradas.length === 0 ? (
         <div className="card">
