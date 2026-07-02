@@ -51,7 +51,9 @@ export default function PlanningPacientePage() {
     queryFn: async () => {
       const { data } = await supabase.from('pacientes').select('*').eq('id', pacienteId).single()
       return data
-    }
+    },
+    // 🟢 NUEVO: Añadido chequeo de usuario
+    enabled: !!pacienteId && !!user?.id
   })
 
   const { data: planning = [], isLoading: loadPlan } = useQuery({
@@ -68,7 +70,8 @@ export default function PlanningPacientePage() {
         .eq('paciente_id', pacienteId).gte('fecha', toStr(dias[0])).lte('fecha', toStr(dias[6]))
       return data ?? []
     },
-    enabled: !!pacienteId,
+    // 🟢 NUEVO: Añadido chequeo de usuario
+    enabled: !!pacienteId && !!user?.id,
   })
 
   const { data: recetas = [] } = useQuery({
@@ -85,10 +88,10 @@ export default function PlanningPacientePage() {
       const todas = [...(propias ?? []), ...guardadas]
       return todas.filter((r, i, arr) => arr.findIndex(x => x.id === r.id) === i).sort((a, b) => a.titulo.localeCompare(b.titulo))
     },
-    enabled: !!hogar?.id,
+    // 🟢 NUEVO: Aseguramos que también haya cargado el usuario
+    enabled: !!hogar?.id && !!user?.id,
   })
 
-  // ── 🟢 LÓGICA: GENERAR LISTA DE LA COMPRA PARA EL PDF ──
   const generarListaCompra = () => {
     const totales = {};
     planning.forEach(p => {

@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   const loadPerfil = useCallback(async (userId) => {
-    let intentos = 3; // Le damos 3 oportunidades para despertar
+    let intentos = 3; 
     
     while (intentos > 0) {
       try {
@@ -21,13 +21,11 @@ export function AuthProvider({ children }) {
           .single()
 
         if (error) {
-          // Si el usuario realmente no existe
           if (error.code === 'PGRST116') {
             setPerfil(null)
             setHogar(null)
             return null
           }
-          // Si es otro error (ej. base de datos dormida), forzamos a que salte al catch
           throw error; 
         }
 
@@ -37,23 +35,20 @@ export function AuthProvider({ children }) {
           return null
         }
 
-        // ¡Despertó y todo fue bien!
         setPerfil(data)
         setHogar(data.hogares ?? null)
         return data
 
       } catch (e) {
         console.error(`Intento fallido. Quedan ${intentos - 1} intentos...`, e)
-        intentos--; // Restamos un intento
+        intentos--; 
         
         if (intentos === 0) {
-          // Si después de 3 intentos no va, avisamos y salimos para que no cargue infinito
           alert("El servidor está tardando mucho en responder. Por favor, recarga la página.");
           setPerfil(null); 
           return null;
         }
         
-        // Esperamos 2 segundos antes de volver a intentar
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }

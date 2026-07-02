@@ -22,7 +22,9 @@ export default function ConsultaPage() {
         .select('*')
         .order('created_at', { ascending: false })
       return data ?? []
-    }
+    },
+    // 🟢 NUEVO: Candado para que no dispare la petición si no hay usuario
+    enabled: !!user?.id 
   })
 
   // Añadir un paciente nuevo
@@ -111,7 +113,6 @@ export default function ConsultaPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
                     padding: '16px', cursor: 'pointer', width: '100%' 
                   }}
-                  // 🟢 CORREGIDO: Añadida la barra / necesaria para la ruta 🟢
                   onClick={() => navigate(`/consulta/paciente/${p.id}`)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

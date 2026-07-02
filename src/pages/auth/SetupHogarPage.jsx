@@ -16,10 +16,14 @@ export default function SetupHogarPage() {
   const [comensales,setComensales]= useState(2)
   const [codigo,    setCodigo]    = useState('')
   
+  // 🟢 NUEVO: Estado para bloquear el bucle infinito
+  const [isProcessing, setIsProcessing] = useState(false)
+  
   const userName = user?.user_metadata?.nombre?.split(' ')[0] || ''
 
   useEffect(() => {
-    if (!user || perfil === undefined) return
+    // 🟢 NUEVO: Si está procesando, paramos la ejecución del useEffect
+    if (!user || perfil === undefined || isProcessing) return
     
     if (perfil?.hogar_id) {
       navigate('/', { replace: true })
@@ -31,6 +35,8 @@ export default function SetupHogarPage() {
     const init = async () => {
       try {
         if (perfil === null) {
+          setIsProcessing(true) // 🟢 Echamos la llave del candado
+          
           await supabase.from('perfiles').upsert({
             id: user.id,
             nombre: user.user_metadata?.nombre || 'Usuario',
@@ -38,6 +44,8 @@ export default function SetupHogarPage() {
           }, { onConflict: 'id' })
           
           await loadPerfil(user.id)
+          
+          if (!cancelled) setIsProcessing(false) // 🟢 Soltamos la llave
           return 
         }
 
@@ -58,6 +66,9 @@ export default function SetupHogarPage() {
             setModo('unirse') 
           }
         }
+      } catch (err) {
+        console.error("Error en la inicialización:", err)
+        if (!cancelled) setIsProcessing(false) // 🟢 Liberamos el candado si hay error para no bloquear la app
       } finally {
         if (!cancelled) setIniciando(false)
       }
@@ -66,7 +77,7 @@ export default function SetupHogarPage() {
     init()
 
     return () => { cancelled = true }
-  }, [user, perfil, loadPerfil, navigate])
+  }, [user, perfil, loadPerfil, navigate, isProcessing]) // 🟢 NUEVO: Añadimos isProcessing a las dependencias
 
   const handleCrear = async (e) => {
     e.preventDefault()
@@ -120,7 +131,6 @@ export default function SetupHogarPage() {
         minHeight:'100dvh', display:'flex', alignItems:'center',
         justifyContent:'center', background:'#F8FAF8',
       }}>
-        {/* 🟢 NUEVO: Aquí aparece tu logo en lugar de la paella 🟢 */}
         <img src="/logo.png" alt="Cargando..." style={{
           width: 60, height: 60,
           objectFit: 'contain',
@@ -149,13 +159,11 @@ export default function SetupHogarPage() {
           background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(64,145,108,.12) 0%,transparent 70%),var(--bg);}
         .logo{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px;}
         
-        /* 🟢 NUEVO: Contenedor del logo sin fondo verde 🟢 */
         .logo-icon-container {
           width: 80px; height: 80px;
           display: flex; align-items: center; justify-content: center;
         }
         
-        /* 🟢 NUEVO: Imagen del logo nítida 🟢 */
         .logo-img {
           width: 100%; height: 100%; object-fit: contain;
         }
@@ -208,7 +216,6 @@ export default function SetupHogarPage() {
 
       <div className="page">
         <div className="logo">
-          {/* 🟢 NUEVO: Contenedor del logo actualizado 🟢 */}
           <div className="logo-icon-container">
             <img src="/logo.png" alt="Logo La Despensa" className="logo-img" />
           </div>
