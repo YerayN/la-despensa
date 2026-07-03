@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { ChevronLeft, ChevronRight, X, Search, Plus, Minus, ArrowUpRight, Printer } from 'lucide-react'
+// 🟢 Añadido ChevronDown para la flechita del desplegable
+import { ChevronLeft, ChevronRight, X, Search, Plus, Minus, ArrowUpRight, Printer, ChevronDown } from 'lucide-react'
 import { syncListaConPlanning } from '../lib/syncLista'
 
 const TIPOS = [
@@ -167,7 +168,6 @@ export default function PlanningPage() {
     }
   })
 
-  // Función para manejar la impresión y cerrar el modal
   const handleImprimir = () => {
     window.print()
     setShowPrintModal(false)
@@ -337,6 +337,7 @@ export default function PlanningPage() {
         .pln-modal-busq input::placeholder { color:var(--text-3); }
         .pln-modal-busq-ico { position:absolute; left:30px; top:50%; transform:translateY(-50%); color:var(--text-3); pointer-events:none; }
         .pln-modal-list { overflow-y:auto; flex:1; border-top:1px solid var(--border); padding:6px; }
+        
         .pln-modal-row {
           display:flex; align-items:center; gap:14px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:background var(--transition);
         }
@@ -347,6 +348,27 @@ export default function PlanningPage() {
         }
         .pln-modal-tit { font-size:15px; font-weight:600; color:var(--text); }
         .pln-modal-sub-r { font-size:13px; color:var(--text-3); margin-top:2px; }
+
+        /* 🟢 NUEVO: ESTILOS PARA LAS CATEGORÍAS ACORDEÓN 🟢 */
+        .pln-cat-details {
+          margin-bottom: 12px; border: 1.5px solid var(--border); border-radius: 14px;
+          background: var(--surface); transition: all var(--transition);
+        }
+        .pln-cat-summary {
+          padding: 14px 16px; font-weight: 700; color: var(--text); cursor: pointer;
+          list-style: none; display: flex; align-items: center; justify-content: space-between;
+          user-select: none; border-radius: 14px; transition: background var(--transition);
+        }
+        .pln-cat-summary:hover { background: var(--surface-2); }
+        .pln-cat-summary::-webkit-details-marker { display: none; } /* Oculta la flechita fea por defecto */
+        .pln-cat-summary-icon {
+          width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+          color: var(--text-3); transition: transform 0.2s;
+        }
+        /* Cuando el desplegable está abierto, rotamos nuestra flecha personalizada */
+        .pln-cat-details[open] .pln-cat-summary-icon { transform: rotate(180deg); color: var(--brand); }
+        .pln-cat-details[open] .pln-cat-summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1.5px solid var(--border); }
+        .pln-cat-content { padding: 8px; }
 
         /* ── ESTILOS MAGICOS PARA EL PDF ── */
         @media screen {
@@ -514,26 +536,79 @@ export default function PlanningPage() {
                 <Search size={16} className="pln-modal-busq-ico" />
                 <input autoFocus placeholder="Buscar entre tus recetas..." value={busq} onChange={e => setBusq(e.target.value)} />
               </div>
-              <div className="pln-modal-list">
+              
+              {/* 🟢 NUEVO: Lista de recetas por categorías usando `<details>` */}
+              <div className="pln-modal-list" style={{ padding: 0 }}>
                 {filtradas.length === 0 ? (
                   <div className="empty-state">
                     <div className="empty-state-icon">📖</div>
                     <p>{busq ? `Sin resultados para "${busq}"` : 'Aún no tienes recetas'}</p>
                   </div>
-                ) : filtradas.map(r => {
-                  const t = TIPOS.find(x => x.key === r.tipo_comida)
-                  return (
-                    <div key={r.id} className="pln-modal-row" onClick={() => asignar.mutate(r.id)}>
-                      <div className="pln-modal-ico" style={{ background: t?.bg ?? 'var(--surface-2)', borderColor: t?.border ?? 'var(--border)' }}>
-                        {t?.emoji ?? '🍽️'}
-                      </div>
-                      <div>
-                        <div className="pln-modal-tit">{r.titulo}</div>
-                        {r.tiempo_coccion && <div className="pln-modal-sub-r">⏱ {r.tiempo_coccion} min</div>}
-                      </div>
-                    </div>
-                  )
-                })}
+                ) : (
+                  <div style={{ padding: '16px' }}>
+                    {TIPOS.map(tipo => {
+                      const recetasCat = filtradas.filter(r => r.tipo_comida === tipo.key)
+                      if (recetasCat.length === 0) return null
+
+                      return (
+                        <details key={tipo.key} className="pln-cat-details" open={busq.length > 0}>
+                          <summary className="pln-cat-summary">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span style={{ fontSize: '18px' }}>{tipo.emoji}</span>
+                              <span>{tipo.label}</span>
+                              <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 'normal' }}>({recetasCat.length})</span>
+                            </div>
+                            <div className="pln-cat-summary-icon"><ChevronDown size={18} /></div>
+                          </summary>
+                          <div className="pln-cat-content">
+                            {recetasCat.map(r => (
+                              <div key={r.id} className="pln-modal-row" onClick={() => asignar.mutate(r.id)}>
+                                <div className="pln-modal-ico" style={{ background: tipo.bg, borderColor: tipo.border }}>
+                                  {tipo.emoji}
+                                </div>
+                                <div>
+                                  <div className="pln-modal-tit">{r.titulo}</div>
+                                  {r.tiempo_coccion && <div className="pln-modal-sub-r">⏱ {r.tiempo_coccion} min</div>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )
+                    })}
+                    
+                    {/* Fallback por si hay recetas sin categoría o con una categoría inventada */}
+                    {(() => {
+                      const recetasOtras = filtradas.filter(r => !TIPOS.find(t => t.key === r.tipo_comida))
+                      if (recetasOtras.length === 0) return null
+                      return (
+                        <details className="pln-cat-details" open={busq.length > 0}>
+                          <summary className="pln-cat-summary">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span style={{ fontSize: '18px' }}>🍲</span>
+                              <span>Otras / Sin clasificar</span>
+                              <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 'normal' }}>({recetasOtras.length})</span>
+                            </div>
+                            <div className="pln-cat-summary-icon"><ChevronDown size={18} /></div>
+                          </summary>
+                          <div className="pln-cat-content">
+                            {recetasOtras.map(r => (
+                              <div key={r.id} className="pln-modal-row" onClick={() => asignar.mutate(r.id)}>
+                                <div className="pln-modal-ico" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
+                                  🍲
+                                </div>
+                                <div>
+                                  <div className="pln-modal-tit">{r.titulo}</div>
+                                  {r.tiempo_coccion && <div className="pln-modal-sub-r">⏱ {r.tiempo_coccion} min</div>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )
+                    })()}
+                  </div>
+                )}
               </div>
             </div>
           </div>
