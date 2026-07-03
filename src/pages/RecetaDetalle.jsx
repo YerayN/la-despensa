@@ -26,14 +26,21 @@ export default function RecetaDetalle() {
   const { data: receta, isLoading } = useQuery({
     queryKey: ['receta', id],
     queryFn: async () => {
-      const { data } = await supabase
+      // 🟢 NUEVO: Añadimos 'error' para capturarlo
+      const { data, error } = await supabase
         .from('recetas')
         .select(`*, perfiles!recetas_autor_id_fkey(nombre),
           receta_ingredientes(cantidad, unidad, notas,
             ingredientes(nombre, categorias_ingredientes(icono)))`)
         .eq('id', id).single()
+      
+      // 🟢 NUEVO: Avisamos a React Query si hay un error real
+      if (error) throw error;
+      
       return data
     },
+    // 🟢 NUEVO: ¡El famoso candado! No pide datos hasta que tengamos usuario
+    enabled: !!user?.id,
   })
 
   const { data: isLiked } = useQuery({
